@@ -1,0 +1,1918 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CharaCard — 캐릭터 관계 카드 메이커</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Noto+Serif+KR:wght@400;700&family=Black+Han+Sans&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+/* ═══════════════════════════════
+   ROOT & RESET
+═══════════════════════════════ */
+:root {
+  --accent: #c0392b;
+  --accent2: #e74c3c;
+  --accent-light: rgba(192,57,43,0.12);
+  --bg-app: #f0ede8;
+  --bg-panel: #ffffff;
+  --bg-panel2: #f7f5f2;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.15);
+  --text: #1a1a1a;
+  --text2: #555;
+  --text3: #888;
+  --shadow: 0 2px 16px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.14);
+  --radius: 10px;
+  --radius-lg: 16px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--bg-app);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+}
+
+/* ═══════════════════════════════
+   APP LAYOUT
+═══════════════════════════════ */
+.app-header {
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+}
+.app-logo {
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: 20px;
+  letter-spacing: 1px;
+  color: var(--accent);
+}
+.app-logo span { color: var(--text); }
+.header-gap { flex: 1; }
+.header-btn {
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 700;
+  letter-spacing: .5px;
+  transition: opacity .15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.header-btn:hover { opacity: .85; }
+.header-btn-sec {
+  background: transparent;
+  border: 1.5px solid var(--border2);
+  color: var(--text2);
+  padding: 7px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  transition: background .15s;
+}
+.header-btn-sec:hover { background: var(--bg-panel2); }
+
+.app-body {
+  display: flex;
+  gap: 0;
+  min-height: calc(100vh - 56px);
+}
+
+/* ═══════════════════════════════
+   EDITOR PANEL (LEFT)
+═══════════════════════════════ */
+.editor-panel {
+  width: 380px;
+  flex-shrink: 0;
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding-bottom: 40px;
+}
+.editor-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--bg-panel);
+  z-index: 10;
+}
+.editor-tab {
+  flex: 1;
+  padding: 12px 8px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text3);
+  border-bottom: 2.5px solid transparent;
+  transition: all .15s;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  font-family: inherit;
+}
+.editor-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.tab-content { display: none; padding: 20px; }
+.tab-content.active { display: block; }
+
+/* Form elements */
+.form-group { margin-bottom: 16px; }
+.form-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 6px;
+}
+.form-input, .form-textarea, .form-select {
+  width: 100%;
+  background: var(--bg-panel2);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-family: 'Noto Sans KR', sans-serif;
+  outline: none;
+  transition: border-color .2s;
+  resize: none;
+}
+.form-input:focus, .form-textarea:focus, .form-select:focus {
+  border-color: var(--accent);
+  background: #fff;
+}
+.form-textarea { min-height: 80px; line-height: 1.6; }
+.form-row { display: flex; gap: 10px; }
+.form-row .form-group { flex: 1; }
+
+.section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 20px 0 12px;
+  padding-bottom: 6px;
+  border-bottom: 1.5px solid var(--accent-light);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.section-title:first-child { margin-top: 0; }
+
+/* Image upload */
+.img-upload-zone {
+  border: 2px dashed var(--border2);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  transition: border-color .2s, background .2s;
+  min-height: 90px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.img-upload-zone:hover { border-color: var(--accent); background: var(--accent-light); }
+.img-upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+.img-upload-zone .preview-img {
+  width: 64px; height: 64px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 2px solid var(--border);
+}
+.upload-hint { font-size: 11px; color: var(--text3); }
+
+/* Tags */
+.tags-input-wrap { position: relative; }
+.tags-list { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 6px; }
+.tag-chip {
+  background: var(--accent-light);
+  color: var(--accent);
+  border: 1px solid rgba(192,57,43,0.2);
+  border-radius: 20px;
+  padding: 3px 10px 3px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.tag-chip button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--accent);
+  padding: 0;
+  font-size: 13px;
+  line-height: 1;
+  opacity: .6;
+}
+.tag-chip button:hover { opacity: 1; }
+.tag-add-row { display: flex; gap: 6px; }
+.tag-add-row .form-input { flex: 1; }
+.tag-add-btn {
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  border-radius: 7px;
+  padding: 0 12px;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  transition: opacity .15s;
+}
+.tag-add-btn:hover { opacity: .8; }
+
+/* Chat messages */
+.chat-msg-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.chat-msg-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-panel2);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.chat-msg-item select {
+  background: #fff;
+  border: 1px solid var(--border2);
+  border-radius: 5px;
+  padding: 3px 6px;
+  font-size: 11px;
+  font-family: inherit;
+  color: var(--text);
+  cursor: pointer;
+  outline: none;
+  flex-shrink: 0;
+  width: 80px;
+}
+.chat-msg-item input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  font-size: 12px;
+  font-family: 'Noto Sans KR', sans-serif;
+  color: var(--text);
+  outline: none;
+}
+.chat-msg-item button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text3);
+  font-size: 15px;
+  padding: 0 2px;
+  transition: color .15s;
+  flex-shrink: 0;
+}
+.chat-msg-item button:hover { color: #e74c3c; }
+.add-chat-btn {
+  width: 100%;
+  background: var(--bg-panel2);
+  border: 1.5px dashed var(--border2);
+  color: var(--text3);
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+  transition: all .15s;
+}
+.add-chat-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Reviews */
+.review-item {
+  background: var(--bg-panel2);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 8px;
+}
+.review-item-head { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+.review-item-head select {
+  background: #fff;
+  border: 1px solid var(--border2);
+  border-radius: 5px;
+  padding: 3px 6px;
+  font-size: 11px;
+  font-family: inherit;
+  color: var(--text);
+  cursor: pointer;
+  outline: none;
+  flex: 1;
+}
+.star-input { display: flex; gap: 2px; }
+.star-input span {
+  cursor: pointer;
+  font-size: 16px;
+  color: #ddd;
+  transition: color .1s;
+}
+.star-input span.lit { color: #f5a623; }
+
+/* Color theme */
+.color-themes { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.color-theme-btn {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 3px solid transparent;
+  transition: transform .15s, border-color .15s;
+  flex-shrink: 0;
+}
+.color-theme-btn:hover { transform: scale(1.15); }
+.color-theme-btn.active { border-color: var(--text); }
+.custom-color-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.color-picker-wrap { display: flex; align-items: center; gap: 6px; }
+.color-picker-wrap label { font-size: 11px; color: var(--text3); }
+.color-picker-wrap input[type=color] {
+  width: 28px; height: 28px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 0;
+  background: none;
+}
+
+/* Slider */
+.slider-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.slider-row label { font-size: 11px; color: var(--text3); min-width: 50px; }
+.slider-row input[type=range] {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border2);
+  outline: none;
+  cursor: pointer;
+}
+.slider-row input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+}
+.slider-row span { font-size: 11px; color: var(--text3); min-width: 28px; }
+
+/* Layout option */
+.layout-opts { display: flex; gap: 8px; }
+.layout-opt {
+  flex: 1;
+  background: var(--bg-panel2);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 8px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 11px;
+  color: var(--text3);
+  transition: all .15s;
+  font-family: inherit;
+}
+.layout-opt.active { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+.layout-icon { font-size: 20px; margin-bottom: 4px; }
+
+
+/* ═══════════════════════════════
+   PREVIEW AREA (RIGHT)
+═══════════════════════════════ */
+.preview-area {
+  flex: 1;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+}
+.preview-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.preview-label::before, .preview-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border2);
+}
+
+/* ═══════════════════════════════
+   CARD OUTPUT
+═══════════════════════════════ */
+#card-output {
+  background: #fff;
+  width: 900px;
+  max-width: 100%;
+  border-radius: 0;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  position: relative;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+/* Card Header */
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: var(--c-accent, #c0392b);
+  color: #fff;
+}
+.card-header-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  opacity: .9;
+  flex-shrink: 0;
+}
+.card-header-type {
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: 17px;
+  letter-spacing: 1px;
+}
+.card-header-relation {
+  background: rgba(255,255,255,0.18);
+  border: 1.5px solid rgba(255,255,255,0.4);
+  color: #fff;
+  border-radius: 4px;
+  padding: 2px 10px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.card-header-gap { flex: 1; }
+.card-header-sub {
+  font-size: 11px;
+  opacity: .75;
+  letter-spacing: .5px;
+}
+.card-header-pair {
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: 15px;
+  letter-spacing: 2px;
+  opacity: .95;
+  margin-left: 4px;
+}
+
+/* Card Body */
+.card-body {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr 1fr;
+  min-height: 620px;
+}
+
+/* Char column */
+.char-col {
+  padding: 22px 18px;
+  border-right: 1px solid rgba(0,0,0,0.07);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+}
+.char-col:last-child { border-right: none; }
+.char-col.right-col { border-left: 1px solid rgba(0,0,0,0.07); border-right: none; }
+
+/* Character profile */
+.char-profile { display: flex; flex-direction: column; gap: 0; margin-bottom: 14px; }
+.char-img-wrap {
+  width: 100%;
+  height: 320px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+.char-img-wrap img { width: 100%; height: 100%; object-fit: contain; object-position: center; }
+.char-img-placeholder {
+  width: 100%; height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #e0e0e0, #c8c8c8);
+  color: #999;
+  font-size: 48px;
+}
+.char-name-block { width: 100%; }
+.char-catchphrase {
+  font-family: 'Noto Serif KR', serif;
+  font-weight: 400;
+  font-size: 11px;
+  color: var(--text2);
+  line-height: 1.6;
+  margin-bottom: 4px;
+  font-style: italic;
+  letter-spacing: .3px;
+  word-break: keep-all;
+}
+.char-name {
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: 20px;
+  letter-spacing: .5px;
+  color: var(--text);
+  line-height: 1.1;
+}
+.char-info {
+  font-size: 10px;
+  color: var(--text3);
+  margin-top: 3px;
+  line-height: 1.5;
+}
+.char-desc {
+  font-size: 11.5px;
+  line-height: 1.7;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.char-desc-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+}
+.char-desc-bar {
+  flex-shrink: 0;
+  width: 3px;
+  min-height: 1em;
+  border-radius: 2px;
+  margin-top: 3px;
+  align-self: stretch;
+}
+.char-desc-text {
+  flex: 1;
+  line-height: 1.7;
+}
+.char-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 14px; }
+.char-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 3px;
+  letter-spacing: .3px;
+}
+.char-tag.style-filled {
+  background: var(--c-accent, #c0392b);
+  color: #fff;
+}
+.char-tag.style-outline {
+  background: transparent;
+  border: 1.5px solid var(--c-accent, #c0392b);
+  color: var(--c-accent, #c0392b);
+}
+.char-tag.style-ghost {
+  background: rgba(0,0,0,0.06);
+  color: var(--text2);
+}
+
+/* Reviews in char col */
+.char-reviews { margin-top: auto; display: flex; flex-direction: column; gap: 6px; }
+.review-card {
+  background: rgba(0,0,0,0.025);
+  border-radius: 6px;
+  padding: 7px 10px;
+  border: 1px solid rgba(0,0,0,0.06);
+}
+.review-card-head { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+.review-stars { display: flex; gap: 1px; }
+.review-star { font-size: 11px; color: #f5a623; }
+.review-star.empty { color: #ddd; }
+.review-score { font-size: 11px; font-weight: 700; color: var(--text2); }
+.review-author { font-size: 10px; color: var(--text3); margin-left: auto; }
+.review-text { font-size: 11px; color: var(--text2); line-height: 1.5; }
+/* Center column */
+.center-col {
+  padding: 22px 20px;
+  display: flex;
+  flex-direction: column;
+}
+.relation-tags { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+
+/* Chat bubble */
+.chat-section { margin-bottom: 16px; }
+.chat-bubble-list { display: flex; flex-direction: column; gap: 6px; }
+.chat-bubble {
+  max-width: 88%;
+  padding: 7px 11px;
+  border-radius: 12px;
+  font-size: 12px;
+  line-height: 1.55;
+  position: relative;
+}
+.chat-bubble.left {
+  background: rgba(0,0,0,0.06);
+  color: var(--text);
+  align-self: flex-start;
+  border-bottom-left-radius: 3px;
+}
+.chat-bubble.right {
+  background: var(--c-accent, #c0392b);
+  color: #fff;
+  align-self: flex-end;
+  border-bottom-right-radius: 3px;
+}
+.chat-bubble.center {
+  background: rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.08);
+  color: var(--text3);
+  align-self: center;
+  font-size: 10.5px;
+  font-style: italic;
+  border-radius: 20px;
+  padding: 4px 12px;
+  max-width: 95%;
+  text-align: center;
+}
+
+.narrative-section { flex: 1; }
+
+/* ── Timeline ── */
+.timeline { display: flex; flex-direction: column; gap: 0; position: relative; padding-left: 20px; }
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  bottom: 6px;
+  width: 1.5px;
+  background: linear-gradient(to bottom, var(--tl-line-color, #c0392b), rgba(0,0,0,0.08));
+}
+.tl-item { position: relative; padding: 0 0 14px 14px; }
+.tl-item:last-child { padding-bottom: 0; }
+.tl-dot {
+  position: absolute;
+  left: -14px;
+  top: 3px;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--c-accent, #c0392b);
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1.5px var(--c-accent, #c0392b);
+  flex-shrink: 0;
+}
+.tl-label {
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--c-accent, #c0392b);
+  margin-bottom: 3px;
+  line-height: 1;
+}
+.tl-text {
+  font-size: 11px;
+  color: var(--text2);
+  line-height: 1.7;
+}
+
+/* Relation meter */
+.relation-meters { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.meter-row { display: flex; flex-direction: column; gap: 3px; }
+.meter-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.meter-label-left  { font-size: 10px; font-weight: 700; color: var(--text2); letter-spacing: .3px; }
+.meter-label-right { font-size: 10px; font-weight: 700; color: var(--text2); letter-spacing: .3px; }
+.meter-track {
+  position: relative;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(0,0,0,0.08);
+  overflow: visible;
+}
+.meter-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  border-radius: 3px;
+  transition: width .3s;
+}
+.meter-dot {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 11px; height: 11px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0;
+  color: var(--text3);
+  font-size: 10px;
+}
+.center-divider::before, .center-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(0,0,0,0.08);
+}
+
+/* Plus button decoration */
+.card-plus-deco {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+}
+.plus-circle {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--c-accent, #c0392b);
+  color: var(--c-accent, #c0392b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 300;
+}
+
+/* Card Footer */
+.card-footer {
+  background: rgba(0,0,0,0.03);
+  border-top: 1px solid rgba(0,0,0,0.07);
+  padding: 8px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.card-footer-tag {
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--c-accent, #c0392b);
+  opacity: .6;
+}
+.card-footer-gap { flex: 1; }
+.card-footer-copy {
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: .3px;
+}
+
+/* ═══════════════════════════════
+   SCROLLBAR
+═══════════════════════════════ */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 3px; }
+
+/* ═══════════════════════════════
+   TOAST
+═══════════════════════════════ */
+#toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  background: #1a1a1a;
+  color: #fff;
+  padding: 10px 22px;
+  border-radius: 24px;
+  font-size: 13px;
+  opacity: 0;
+  transition: all .3s;
+  z-index: 9999;
+  pointer-events: none;
+  white-space: nowrap;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Util */
+.btn-small {
+  background: var(--bg-panel2);
+  border: 1.5px solid var(--border2);
+  color: var(--text2);
+  border-radius: 6px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-size: 11px;
+  font-family: inherit;
+  transition: background .15s;
+}
+.btn-small:hover { background: #ece9e4; }
+select option { background: #fff; color: #1a1a1a; }
+
+.dir-btn {
+  background: var(--bg-panel2);
+  border: 1.5px solid var(--border2);
+  color: var(--text3);
+  border-radius: 5px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all .15s;
+}
+.dir-btn:hover { color: var(--text); }
+.dir-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+</style>
+</head>
+<body>
+
+<!-- App Header -->
+<header class="app-header">
+  <div class="app-logo">Chara<span>Card</span></div>
+  <span style="font-size:12px;color:var(--text3);">캐릭터 관계 카드 메이커</span>
+  <div class="header-gap"></div>
+  <button class="header-btn-sec" id="btn-reset">초기화</button>
+  <button class="header-btn" id="btn-export">💾 PNG 저장</button>
+</header>
+
+<div class="app-body">
+
+  <!-- ── EDITOR PANEL ── -->
+  <div class="editor-panel">
+    <div class="editor-tabs">
+      <button class="editor-tab active" data-tab="char1">캐릭터 A</button>
+      <button class="editor-tab" data-tab="char2">캐릭터 B</button>
+      <button class="editor-tab" data-tab="relation">관계 & 서사</button>
+      <button class="editor-tab" data-tab="design">디자인</button>
+    </div>
+
+    <!-- ═ Char 1 Tab ═ -->
+    <div class="tab-content active" id="tab-char1">
+      <div class="section-title">● 기본 정보</div>
+      <div class="form-group">
+        <label class="form-label">캐릭터 이름</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input class="form-input" id="c1-name" placeholder="캐릭터이름1" value="캐릭터이름1" style="flex:1;">
+          <input type="color" id="c1-name-color" value="#1a1a1a" style="width:32px;height:36px;border:none;border-radius:6px;cursor:pointer;flex-shrink:0;" title="이름 색상">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">한마디</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input class="form-input" id="c1-catchphrase" placeholder="캐릭터이름1의 한마디..." value="" style="flex:1;">
+          <input type="color" id="c1-catchphrase-color" value="#555555" style="width:26px;height:26px;border:none;border-radius:5px;cursor:pointer;flex-shrink:0;" title="한마디 색상">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">성별 / 나이</label>
+          <input class="form-input" id="c1-age" placeholder="성별 | 나이" value="성별 | 나이">
+        </div>
+        <div class="form-group">
+          <label class="form-label">소속 / 직업</label>
+          <input class="form-input" id="c1-affil" placeholder="소속 / 직업" value="소속 / 직업">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="margin-bottom:4px;">성별·나이·소속 색상</label>
+        <input type="color" id="c1-info-color" value="#888799" style="width:26px;height:26px;border:none;border-radius:5px;cursor:pointer;">
+      </div>
+      <div class="form-group">
+        <label class="form-label">캐릭터 이미지</label>
+        <div class="img-upload-zone" id="c1-upload">
+          <input type="file" accept="image/*" id="c1-file">
+          <div id="c1-preview-wrap">
+            <div style="font-size:28px;">🖼</div>
+            <div class="upload-hint">클릭하여 이미지 업로드</div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">캐릭터 설명</label>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
+          <span style="font-size:11px;color:var(--text3);">막대색</span>
+          <input type="color" id="c1-desc-bar-color" value="#c0392b" style="width:26px;height:26px;border:none;border-radius:5px;cursor:pointer;">
+          <span style="font-size:11px;color:var(--text3);">글자색</span>
+          <input type="color" id="c1-desc-text-color" value="#555555" style="width:26px;height:26px;border:none;border-radius:5px;cursor:pointer;">
+        </div>
+        <textarea class="form-textarea" id="c1-desc" placeholder="캐릭터이름1에 대한 소개를 입력하세요...&#10;엔터로 문단을 나누면 막대기가 각각 생깁니다.">캐릭터이름1에 대한 소개를 입력하세요.</textarea>
+      </div>
+
+      <div class="section-title">● 태그</div>
+      <div class="form-group">
+        <div class="tags-list" id="c1-tags-list"></div>
+        <div class="tag-add-row">
+          <input class="form-input" id="c1-tag-input" placeholder="태그 입력 후 추가..." style="font-size:12px;">
+          <button class="tag-add-btn" id="c1-tag-btn">+</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+          <span style="font-size:11px;color:var(--text3);">태그 스타일</span>
+          <select class="form-select" id="c1-tag-style" style="flex:1;font-size:12px;">
+            <option value="filled">채워진 (Filled)</option>
+            <option value="outline">테두리 (Outline)</option>
+            <option value="ghost">회색 (Ghost)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section-title">● 한줄 리뷰</div>
+      <div id="c1-reviews"></div>
+      <button class="add-chat-btn" id="c1-add-review">+ 리뷰 추가</button>
+    </div>
+
+    <!-- ═ Char 2 Tab ═ -->
+    <div class="tab-content" id="tab-char2">
+      <div class="section-title">● 기본 정보</div>
+      <div class="form-group">
+        <label class="form-label">캐릭터 이름</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input class="form-input" id="c2-name" placeholder="캐릭터이름2" value="캐릭터이름2" style="flex:1;">
+          <input type="color" id="c2-name-color" value="#1a1a1a" style="width:32px;height:36px;border:none;border-radius:6px;cursor:pointer;flex-shrink:0;" title="이름 색상">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">한마디</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input class="form-input" id="c2-catchphrase" placeholder="캐릭터이름2의 한마디..." value="" style="flex:1;">
+          <input type="color" id="c2-catchphrase-color" value="#555555" style="width:26px;height:26px;border:none;border-radius:5px;cursor:pointer;flex-shrink:0;" title="한마디 색상">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">성별 / 나이</label>
+          <input class="form-input" id="c2-age" placeholder="성별 | 나이" value="성별 | 나이">
+        </div>
+        <div class="form-group">
+          <label class="form-label">소속 / 직업</label>
+          <input class="form-input" id="c2-affil" placeholder="소속 / 직업" value="소속 / 직업">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="margin-bottom:4px;">성별·나이·소속 색상</label>
+        <input type="color" id="c2-info-color" value="#888799" style="width:26px;height:26px;border:none;border-radius:5px;cursor:pointer;">
+      </div>
+      <div class="form-group">
+        <label class="form-label">캐릭터 이미지</label>
+        <div class="img-upload-zone" id="c2-upload">
+          <input type="file" accept="image/*" id="c2-file">
+          <div id="c2-preview-wrap">
+            <div style="font-size:28px;">🖼</div>
+            <div class="upload-hint">클릭하여 이미지 업로드</div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">캐릭터 설명</label>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
+          <span style="font-size:11px;color:var(--text3);">막대색</span>
+          <input type="color" id="c2-desc-bar-color" value="#c0392b" style="width:26px;height:26px;border:none;border-radius:5px;cursor:pointer;">
+          <span style="font-size:11px;color:var(--text3);">글자색</span>
+          <input type="color" id="c2-desc-text-color" value="#555555" style="width:26px;height:26px;border:none;border-radius:5px;cursor:pointer;">
+        </div>
+        <textarea class="form-textarea" id="c2-desc" placeholder="캐릭터이름2에 대한 소개를 입력하세요...&#10;엔터로 문단을 나누면 막대기가 각각 생깁니다.">캐릭터이름2에 대한 소개를 입력하세요.</textarea>
+      </div>
+
+      <div class="section-title">● 태그</div>
+      <div class="form-group">
+        <div class="tags-list" id="c2-tags-list"></div>
+        <div class="tag-add-row">
+          <input class="form-input" id="c2-tag-input" placeholder="태그 입력 후 추가..." style="font-size:12px;">
+          <button class="tag-add-btn" id="c2-tag-btn">+</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+          <span style="font-size:11px;color:var(--text3);">태그 스타일</span>
+          <select class="form-select" id="c2-tag-style" style="flex:1;font-size:12px;">
+            <option value="filled">채워진 (Filled)</option>
+            <option value="outline">테두리 (Outline)</option>
+            <option value="ghost">회색 (Ghost)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section-title">● 한줄 리뷰</div>
+      <div id="c2-reviews"></div>
+      <button class="add-chat-btn" id="c2-add-review">+ 리뷰 추가</button>
+    </div>
+
+    <!-- ═ Relation Tab ═ -->
+    <div class="tab-content" id="tab-relation">
+      <div class="section-title">● 관계 헤더</div>
+      <div class="form-group">
+        <label class="form-label">페어명</label>
+        <input class="form-input" id="rel-type" placeholder="페어명" value="페어명">
+      </div>
+      <div class="form-group">
+        <label class="form-label">배경 / 세계관</label>
+        <input class="form-input" id="rel-world" placeholder="캐릭터이름1 with 캐릭터이름2" value="캐릭터이름1 with 캐릭터이름2">
+      </div>
+
+      <div class="section-title">● 관계 수치 슬라이더</div>
+      <div id="meter-editor" style="display:flex;flex-direction:column;gap:10px;margin-bottom:8px;"></div>
+      <button class="add-chat-btn" id="add-meter-btn">+ 수치 추가</button>
+
+      <div class="section-title">● 대화 / 명대사</div>
+      <div style="background:var(--bg-panel2);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;gap:16px;align-items:center;margin-bottom:10px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <div style="width:10px;height:10px;border-radius:50%;background:var(--bg-panel2);border:2px solid var(--border2);"></div>
+          <span style="font-size:11px;color:var(--text3);">A 말풍선</span>
+          <input type="color" id="bubble-c1" value="#ebebeb" style="width:26px;height:26px;border:none;border-radius:5px;cursor:pointer;">
+          <input type="color" id="bubble-c1-text" value="#1a1a1a" style="width:26px;height:26px;border:none;border-radius:5px;cursor:pointer;" title="글자색">
+        </div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <div style="width:10px;height:10px;border-radius:50%;background:var(--accent);"></div>
+          <span style="font-size:11px;color:var(--text3);">B 말풍선</span>
+          <input type="color" id="bubble-c2" value="#c0392b" style="width:26px;height:26px;border:none;border-radius:5px;cursor:pointer;">
+          <input type="color" id="bubble-c2-text" value="#ffffff" style="width:26px;height:26px;border:none;border-radius:5px;cursor:pointer;" title="글자색">
+        </div>
+        <span style="font-size:10px;color:var(--text3);">배경 · 글자색</span>
+      </div>
+      <div class="chat-msg-list" id="chat-list"></div>
+      <button class="add-chat-btn" id="add-chat-btn">+ 대화 추가</button>
+
+      <div class="section-title" style="margin-top:20px;">● 관계 서사 타임라인</div>
+      <div style="background:var(--bg-panel2);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:11px;color:var(--text3);">제목</span>
+          <input type="color" id="tl-label-color" value="#c0392b" style="width:26px;height:26px;border:none;border-radius:5px;cursor:pointer;" title="제목 색상">
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:11px;color:var(--text3);">바</span>
+          <input type="color" id="tl-bar-color" value="#c0392b" style="width:26px;height:26px;border:none;border-radius:5px;cursor:pointer;" title="타임라인 바 색상">
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:11px;color:var(--text3);">내용</span>
+          <input type="color" id="tl-text-color" value="#555555" style="width:26px;height:26px;border:none;border-radius:5px;cursor:pointer;" title="내용 글자 색상">
+        </div>
+      </div>
+      <div id="timeline-editor" style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px;"></div>
+      <button class="add-chat-btn" id="add-timeline-btn">+ 단계 추가</button>
+    </div>
+
+    <!-- ═ Design Tab ═ -->
+    <div class="tab-content" id="tab-design">
+      <div class="section-title">● 테마 컬러</div>
+
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;">단색 프리셋</div>
+      <div class="color-themes" id="solid-presets">
+        <button class="color-theme-btn active" style="background:#c0392b;" data-grad="false" data-c1="#c0392b" title="레드"></button>
+        <button class="color-theme-btn" style="background:#2c3e7a;" data-grad="false" data-c1="#2c3e7a" title="네이비"></button>
+        <button class="color-theme-btn" style="background:#1a6b4a;" data-grad="false" data-c1="#1a6b4a" title="딥그린"></button>
+        <button class="color-theme-btn" style="background:#6c3483;" data-grad="false" data-c1="#6c3483" title="퍼플"></button>
+        <button class="color-theme-btn" style="background:#1a5276;" data-grad="false" data-c1="#1a5276" title="딥블루"></button>
+        <button class="color-theme-btn" style="background:#784212;" data-grad="false" data-c1="#784212" title="브라운"></button>
+        <button class="color-theme-btn" style="background:#1c2833;" data-grad="false" data-c1="#1c2833" title="다크"></button>
+        <button class="color-theme-btn" style="background:#b5179e;" data-grad="false" data-c1="#b5179e" title="핫핑크"></button>
+      </div>
+
+      <div style="font-size:11px;color:var(--text3);margin:12px 0 8px;">그라데이션 프리셋</div>
+      <div class="color-themes" id="grad-presets">
+        <button class="color-theme-btn" style="background:linear-gradient(135deg,#c0392b,#e67e22);" data-grad="true" data-c1="#c0392b" data-c2="#e67e22" data-dir="135" title="선셋"></button>
+        <button class="color-theme-btn" style="background:linear-gradient(135deg,#b5179e,#7209b7);" data-grad="true" data-c1="#b5179e" data-c2="#7209b7" data-dir="135" title="핑크퍼플"></button>
+        <button class="color-theme-btn" style="background:linear-gradient(135deg,#1a5276,#1a6b4a);" data-grad="true" data-c1="#1a5276" data-c2="#1a6b4a" data-dir="135" title="오션"></button>
+        <button class="color-theme-btn" style="background:linear-gradient(135deg,#6c3483,#1a5276);" data-grad="true" data-c1="#6c3483" data-c2="#1a5276" data-dir="135" title="갤럭시"></button>
+        <button class="color-theme-btn" style="background:linear-gradient(135deg,#c0392b,#6c3483);" data-grad="true" data-c1="#c0392b" data-c2="#6c3483" data-dir="135" title="레드퍼플"></button>
+        <button class="color-theme-btn" style="background:linear-gradient(135deg,#1c2833,#2c3e7a);" data-grad="true" data-c1="#1c2833" data-c2="#2c3e7a" data-dir="135" title="나이트"></button>
+        <button class="color-theme-btn" style="background:linear-gradient(135deg,#784212,#c0392b);" data-grad="true" data-c1="#784212" data-c2="#c0392b" data-dir="135" title="어텀"></button>
+        <button class="color-theme-btn" style="background:linear-gradient(135deg,#1a6b4a,#e67e22);" data-grad="true" data-c1="#1a6b4a" data-c2="#e67e22" data-dir="135" title="포레스트"></button>
+      </div>
+
+      <div style="font-size:11px;color:var(--text3);margin:12px 0 8px;">직접 설정</div>
+      <div style="background:var(--bg-panel2);border:1.5px solid var(--border);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span style="font-size:11px;color:var(--text3);min-width:40px;">색상1</span>
+          <input type="color" id="grad-c1" value="#c0392b" style="width:32px;height:32px;border:none;border-radius:6px;cursor:pointer;">
+          <span style="font-size:11px;color:var(--text3);min-width:40px;margin-left:8px;">색상2</span>
+          <input type="color" id="grad-c2" value="#c0392b" style="width:32px;height:32px;border:none;border-radius:6px;cursor:pointer;">
+          <label style="font-size:11px;color:var(--text3);margin-left:auto;display:flex;align-items:center;gap:4px;">
+            <input type="checkbox" id="use-gradient" style="cursor:pointer;"> 그라데이션
+          </label>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;" id="dir-row">
+          <span style="font-size:11px;color:var(--text3);min-width:40px;">방향</span>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;">
+            <button class="dir-btn active" data-deg="135">↘ 대각</button>
+            <button class="dir-btn" data-deg="90">↓ 세로</button>
+            <button class="dir-btn" data-deg="0">→ 가로</button>
+            <button class="dir-btn" data-deg="45">↗ 역대각</button>
+          </div>
+        </div>
+        <div id="grad-preview-bar" style="height:28px;border-radius:6px;background:#c0392b;transition:background .2s;"></div>
+      </div>
+
+      <div class="section-title" style="margin-top:20px;">● 카드 배경</div>
+      <div class="form-group">
+        <label class="form-label">배경색</label>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <input type="color" id="card-bg" value="#ffffff" style="width:32px;height:32px;border:none;border-radius:6px;cursor:pointer;background:none;">
+          <span style="font-size:11px; color:var(--text3);">카드 배경 색상</span>
+        </div>
+      </div>
+
+      <div class="section-title">● 레이아웃</div>
+      <div class="form-group">
+        <label class="form-label">카드 너비</label>
+        <div class="slider-row">
+          <label>너비</label>
+          <input type="range" id="card-width" min="600" max="1100" value="900" step="20">
+          <span id="v-cardwidth">900px</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">헤더 텍스트 색상</label>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <input type="color" id="header-text-color" value="#ffffff" style="width:32px;height:32px;border:none;border-radius:6px;cursor:pointer;background:none;">
+          <span style="font-size:11px; color:var(--text3);">헤더 텍스트 색</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PREVIEW AREA ── -->
+  <div class="preview-area">
+    <div class="preview-label">미리보기</div>
+
+    <!-- ======= CARD OUTPUT ======= -->
+    <div id="card-output">
+
+      <!-- Card Header -->
+      <div class="card-header" id="card-header-el">
+        <div class="card-header-dot"></div>
+        <div class="card-header-type" id="out-type">페어명</div>
+        <div class="card-header-gap"></div>
+        <div class="card-header-sub" id="out-world">캐릭터이름1 with 캐릭터이름2</div>
+      </div>
+
+      <!-- Card Body: 3 columns -->
+      <div class="card-body">
+
+        <!-- ── Left: Char A ── -->
+        <div class="char-col" id="col-char1">
+          <div class="char-profile">
+            <div class="char-img-wrap" id="c1-img-wrap">
+              <div class="char-img-placeholder">👤</div>
+            </div>
+            <div class="char-name-block">
+              <div class="char-catchphrase" id="out-c1-catchphrase"></div>
+              <div class="char-name" id="out-c1-name">캐릭터이름1</div>
+              <div class="char-info" id="out-c1-info">성별 | 나이 | 소속 / 직업</div>
+            </div>
+          </div>
+          <div class="char-desc" id="out-c1-desc">캐릭터이름1에 대한 소개를 입력하세요.</div>
+          <div class="char-tags" id="out-c1-tags"></div>
+          <div class="char-reviews" id="out-c1-reviews"></div>
+        </div>
+
+        <!-- ── Center: Relation ── -->
+        <div class="center-col">
+          <div class="relation-tags" id="out-rel-tags"></div>
+          <div class="chat-section">
+            <div class="chat-bubble-list" id="out-chat"></div>
+          </div>
+          <div class="center-divider">서사</div>
+          <div class="narrative-section">
+            <div class="timeline" id="out-timeline"></div>
+          </div>
+          <div class="card-plus-deco">
+            <div class="plus-circle">+</div>
+          </div>
+        </div>
+
+        <!-- ── Right: Char B ── -->
+        <div class="char-col right-col" id="col-char2">
+          <div class="char-profile">
+            <div class="char-img-wrap" id="c2-img-wrap">
+              <div class="char-img-placeholder">👤</div>
+            </div>
+            <div class="char-name-block">
+              <div class="char-catchphrase" id="out-c2-catchphrase"></div>
+              <div class="char-name" id="out-c2-name">캐릭터이름2</div>
+              <div class="char-info" id="out-c2-info">성별 | 나이 | 소속 / 직업</div>
+            </div>
+          </div>
+          <div class="char-desc" id="out-c2-desc">캐릭터이름2에 대한 소개를 입력하세요.</div>
+          <div class="char-tags" id="out-c2-tags"></div>
+          <div class="char-reviews" id="out-c2-reviews"></div>
+        </div>
+      </div>
+
+      <!-- Card Footer -->
+      <div class="card-footer">
+        <div class="card-footer-gap"></div>
+        <div class="card-footer-copy" id="out-copy">ⓒ화송</div>
+      </div>
+
+    </div><!-- end card-output -->
+
+    <div style="height:40px;"></div>
+  </div><!-- end preview-area -->
+
+</div><!-- end app-body -->
+
+<div id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════
+   STATE
+═══════════════════════════════════════ */
+const state = {
+  c1: { name:'캐릭터이름1', nameColor:'#1a1a1a', catchphrase:'', catchphraseColor:'#555555', age:'성별 | 나이', affil:'소속 / 직업', infoColor:'#888799', desc:'캐릭터이름1에 대한 소개를 입력하세요.', descBarColor:'#c0392b', descTextColor:'#555555', tagStyle:'filled', img:null, tags:[], reviews:[] },
+  c2: { name:'캐릭터이름2', nameColor:'#1a1a1a', catchphrase:'', catchphraseColor:'#555555', age:'성별 | 나이', affil:'소속 / 직업', infoColor:'#888799', desc:'캐릭터이름2에 대한 소개를 입력하세요.', descBarColor:'#c0392b', descTextColor:'#555555', tagStyle:'filled', img:null, tags:[], reviews:[] },
+  rel: { type:'페어명', world:'캐릭터이름1 with 캐릭터이름2', meters:[ {left:'적대감', right:'친밀감', value:30}, {left:'불신', right:'신뢰', value:50}, {left:'거리감', right:'의존', value:20} ], chat:[ {side:'left', text:'캐릭터이름1의 대사'}, {side:'right', text:'캐릭터이름2의 대사'} ], timeline:[ {label:'만남', text:'두 사람의 첫 만남을 입력하세요.'}, {label:'갈등', text:'갈등과 긴장감을 입력하세요.'}, {label:'전환점', text:'관계의 전환점을 입력하세요.'} ], tlLabelColor:'#c0392b', tlBarColor:'#c0392b', tlTextColor:'#555555' },
+  design: { accent:'#c0392b', useGradient:false, gradC1:'#c0392b', gradC2:'#c0392b', gradDir:135, cardBg:'#ffffff', tagStyle:'filled', cardWidth:900, headerTextColor:'#ffffff', bubbleC1:'#ebebeb', bubbleC1Text:'#1a1a1a', bubbleC2:'#c0392b', bubbleC2Text:'#ffffff' }
+};
+
+/* ═══════════════════════════════════════
+   TABS
+═══════════════════════════════════════ */
+document.querySelectorAll('.editor-tab').forEach(tab => {
+  tab.onclick = () => {
+    document.querySelectorAll('.editor-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+  };
+});
+
+/* ═══════════════════════════════════════
+   LIVE BINDINGS — text inputs
+═══════════════════════════════════════ */
+function bind(inputId, stateObj, key, outputId, transform) {
+  const el = document.getElementById(inputId);
+  if (!el) return;
+  el.oninput = () => {
+    stateObj[key] = el.value;
+    if (outputId) {
+      const out = document.getElementById(outputId);
+      if (out) out.textContent = transform ? transform(el.value) : el.value;
+    }
+    renderCard();
+  };
+}
+bind('c1-name','','',null); // handled in renderCard
+bind('c2-name','','',null);
+
+['c1-name','c1-catchphrase','c1-age','c1-affil','c1-desc',
+ 'c2-name','c2-catchphrase','c2-age','c2-affil','c2-desc',
+ 'rel-type','rel-world'
+].forEach(id => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.oninput = () => {
+    const [grp, key] = id.split('-');
+    if (grp === 'c1') state.c1[key] = el.value;
+    else if (grp === 'c2') state.c2[key] = el.value;
+    else if (grp === 'rel') state.rel[key] = el.value;
+    renderCard();
+  };
+});
+
+/* ═══════════════════════════════════════
+   IMAGE UPLOAD
+═══════════════════════════════════════ */
+function setupImgUpload(fileId, stateObj, previewId, wrapId) {
+  document.getElementById(fileId).onchange = function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      stateObj.img = ev.target.result;
+      const wrap = document.getElementById(previewId);
+      wrap.innerHTML = `<img src="${ev.target.result}" class="preview-img">`;
+      renderCard();
+    };
+    reader.readAsDataURL(file);
+  };
+}
+setupImgUpload('c1-file', state.c1, 'c1-preview-wrap', 'c1-upload');
+setupImgUpload('c2-file', state.c2, 'c2-preview-wrap', 'c2-upload');
+
+/* ═══════════════════════════════════════
+   TAGS
+═══════════════════════════════════════ */
+function setupTags(inputId, btnId, listId, stateArr, renderFn) {
+  const input = document.getElementById(inputId);
+  const btn = document.getElementById(btnId);
+  function addTag() {
+    const v = input.value.trim();
+    if (!v) return;
+    stateArr.push(v);
+    input.value = '';
+    renderEditorTags(listId, stateArr, renderFn);
+    renderFn();
+  }
+  btn.onclick = addTag;
+  input.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } };
+  renderEditorTags(listId, stateArr, renderFn);
+}
+function renderEditorTags(listId, arr, renderFn) {
+  const list = document.getElementById(listId);
+  list.innerHTML = '';
+  arr.forEach((tag, i) => {
+    const chip = document.createElement('div');
+    chip.className = 'tag-chip';
+    chip.innerHTML = `${tag}<button onclick="removeTag(${JSON.stringify(listId)},${i})">×</button>`;
+    list.appendChild(chip);
+  });
+}
+window.removeTag = (listId, idx) => {
+  if (listId === 'c1-tags-list') { state.c1.tags.splice(idx,1); renderEditorTags('c1-tags-list', state.c1.tags, renderCard); }
+  else if (listId === 'c2-tags-list') { state.c2.tags.splice(idx,1); renderEditorTags('c2-tags-list', state.c2.tags, renderCard); }
+  renderCard();
+};
+setupTags('c1-tag-input','c1-tag-btn','c1-tags-list', state.c1.tags, renderCard);
+setupTags('c2-tag-input','c2-tag-btn','c2-tags-list', state.c2.tags, renderCard);
+
+/* ═══════════════════════════════════════
+   RELATION METERS
+═══════════════════════════════════════ */
+const METER_PRESETS = [
+  {left:'적대감', right:'친밀감'},
+  {left:'불신',   right:'신뢰'},
+  {left:'거리감', right:'의존'},
+  {left:'냉담',   right:'열정'},
+  {left:'경쟁',   right:'협력'},
+  {left:'증오',   right:'사랑'},
+  {left:'긴장',   right:'안정'},
+  {left:'외면',   right:'집착'},
+];
+
+function renderMeterEditor() {
+  const container = document.getElementById('meter-editor');
+  container.innerHTML = '';
+  state.rel.meters.forEach((m, i) => {
+    const item = document.createElement('div');
+    item.style.cssText = 'background:var(--bg-panel2);border:1.5px solid var(--border);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:7px;';
+    item.innerHTML = `
+      <div style="display:flex;gap:6px;align-items:center;">
+        <input type="text" value="${m.left}" placeholder="왼쪽 레이블"
+          style="flex:1;background:#fff;border:1px solid var(--border2);border-radius:5px;padding:4px 7px;font-size:11px;font-family:inherit;color:var(--text);outline:none;"
+          oninput="updateMeter(${i},'left',this.value)">
+        <span style="font-size:11px;color:var(--text3);">←●→</span>
+        <input type="text" value="${m.right}" placeholder="오른쪽 레이블"
+          style="flex:1;background:#fff;border:1px solid var(--border2);border-radius:5px;padding:4px 7px;font-size:11px;font-family:inherit;color:var(--text);outline:none;"
+          oninput="updateMeter(${i},'right',this.value)">
+        <button onclick="removeMeter(${i})" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:0 2px;" onmouseover="this.style.color='#e74c3c'" onmouseout="this.style.color=''">✕</button>
+      </div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;">
+        ${METER_PRESETS.map(p=>`<button onclick="setMeterPreset(${i},'${p.left}','${p.right}')" style="background:var(--accent-light);border:1px solid rgba(192,57,43,0.15);color:var(--accent);border-radius:10px;padding:2px 7px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;">${p.left}↔${p.right}</button>`).join('')}
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:10px;color:var(--text3);min-width:28px;">${m.value}%</span>
+        <input type="range" min="0" max="100" value="${m.value}"
+          style="flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--border2);outline:none;cursor:pointer;"
+          oninput="updateMeter(${i},'value',+this.value); this.previousElementSibling.textContent=this.value+'%'">
+      </div>
+    `;
+    container.appendChild(item);
+  });
+}
+
+window.updateMeter = (i, key, val) => { state.rel.meters[i][key] = val; renderCard(); };
+window.removeMeter = (i) => { state.rel.meters.splice(i,1); renderMeterEditor(); renderCard(); };
+window.setMeterPreset = (i, left, right) => { state.rel.meters[i].left=left; state.rel.meters[i].right=right; renderMeterEditor(); renderCard(); };
+
+document.getElementById('add-meter-btn').onclick = () => {
+  state.rel.meters.push({left:'왼쪽', right:'오른쪽', value:50});
+  renderMeterEditor();
+  renderCard();
+};
+
+renderMeterEditor();
+
+/* ═══════════════════════════════════════
+   REVIEWS
+═══════════════════════════════════════ */
+function setupReviews(containerId, addBtnId, stateArr) {
+  document.getElementById(addBtnId).onclick = () => {
+    stateArr.push({ author:'캐릭터명', score:3, text:'한줄 코멘트...' });
+    renderEditorReviews(containerId, stateArr);
+    renderCard();
+  };
+  renderEditorReviews(containerId, stateArr);
+}
+function renderEditorReviews(containerId, arr) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  arr.forEach((rev, i) => {
+    const div = document.createElement('div');
+    div.className = 'review-item';
+    div.innerHTML = `
+      <div class="review-item-head">
+        <input type="text" placeholder="캐릭터명" value="${rev.author}" style="flex:1;background:#fff;border:1px solid var(--border2);border-radius:5px;padding:3px 7px;font-size:12px;font-family:inherit;outline:none;" oninput="updateReview(${i},'author',this.value,'${containerId}')">
+        <div class="star-input" id="stars-${containerId}-${i}"></div>
+        <button onclick="removeReview(${i},'${containerId}')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:0 4px;">✕</button>
+      </div>
+      <input type="text" placeholder="한줄 코멘트..." value="${rev.text}" style="width:100%;background:#fff;border:1px solid var(--border2);border-radius:5px;padding:5px 8px;font-size:11px;font-family:inherit;outline:none;" oninput="updateReview(${i},'text',this.value,'${containerId}')">
+    `;
+    container.appendChild(div);
+    renderStarInput(`stars-${containerId}-${i}`, rev.score, n => {
+      arr[i].score = n;
+      renderStarInput(`stars-${containerId}-${i}`, n, null, arr[i]);
+      renderCard();
+    });
+  });
+}
+function renderStarInput(id, score, onClick) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = '';
+  for (let n = 1; n <= 5; n++) {
+    const s = document.createElement('span');
+    s.textContent = '★';
+    s.className = n <= score ? 'lit' : '';
+    if (onClick) s.onclick = () => onClick(n);
+    el.appendChild(s);
+  }
+}
+window.updateReview = (idx, key, val, containerId) => {
+  const arr = containerId === 'c1-reviews' ? state.c1.reviews : state.c2.reviews;
+  arr[idx][key] = val;
+  renderCard();
+};
+window.removeReview = (idx, containerId) => {
+  const arr = containerId === 'c1-reviews' ? state.c1.reviews : state.c2.reviews;
+  arr.splice(idx,1);
+  renderEditorReviews(containerId, arr);
+  renderCard();
+};
+setupReviews('c1-reviews','c1-add-review', state.c1.reviews);
+setupReviews('c2-reviews','c2-add-review', state.c2.reviews);
+
+/* ═══════════════════════════════════════
+   CHAT MESSAGES
+═══════════════════════════════════════ */
+function renderChatEditor() {
+  const list = document.getElementById('chat-list');
+  list.innerHTML = '';
+  state.rel.chat.forEach((msg, i) => {
+    const item = document.createElement('div');
+    item.className = 'chat-msg-item';
+    item.innerHTML = `
+      <select onchange="updateChat(${i},'side',this.value)">
+        <option value="left" ${msg.side==='left'?'selected':''}>← 왼쪽</option>
+        <option value="right" ${msg.side==='right'?'selected':''}>오른쪽 →</option>
+        <option value="center" ${msg.side==='center'?'selected':''}>중앙 설명</option>
+      </select>
+      <input type="text" value="${msg.text}" placeholder="대사 입력..." oninput="updateChat(${i},'text',this.value)">
+      <button onclick="removeChat(${i})">✕</button>
+    `;
+    list.appendChild(item);
+  });
+}
+window.updateChat = (i, key, val) => { state.rel.chat[i][key] = val; renderCard(); };
+window.removeChat = (i) => { state.rel.chat.splice(i,1); renderChatEditor(); renderCard(); };
+document.getElementById('add-chat-btn').onclick = () => {
+  state.rel.chat.push({side:'left', text:'새 대화...'});
+  renderChatEditor();
+  renderCard();
+};
+renderChatEditor();
+
+/* ═══════════════════════════════════════
+   TIMELINE
+═══════════════════════════════════════ */
+const TL_PRESETS = ['만남','갈등','전환점','화해','결말','비밀','고백','이별','재회','각성'];
+
+function renderTimelineEditor() {
+  const container = document.getElementById('timeline-editor');
+  container.innerHTML = '';
+  state.rel.timeline.forEach((step, i) => {
+    const item = document.createElement('div');
+    item.style.cssText = 'background:var(--bg-panel2);border:1.5px solid var(--border);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:6px;';
+    item.innerHTML = `
+      <div style="display:flex;gap:6px;align-items:center;">
+        <div style="width:10px;height:10px;border-radius:50%;background:var(--accent);flex-shrink:0;"></div>
+        <input type="text" value="${step.label}" placeholder="단계명 (예: 만남)"
+          style="flex:1;background:#fff;border:1px solid var(--border2);border-radius:5px;padding:4px 8px;font-size:12px;font-family:inherit;color:var(--text);outline:none;"
+          oninput="updateTimeline(${i},'label',this.value)">
+        <button onclick="removeTimeline(${i})" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:0 3px;" onmouseover="this.style.color='#e74c3c'" onmouseout="this.style.color=''">✕</button>
+      </div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;">
+        ${TL_PRESETS.map(p => `<button onclick="setTimelineLabel(${i},'${p}')" style="background:var(--accent-light);border:1px solid rgba(192,57,43,0.15);color:var(--accent);border-radius:12px;padding:2px 8px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;">${p}</button>`).join('')}
+      </div>
+      <textarea placeholder="이 단계의 서사를 입력하세요..."
+        style="width:100%;background:#fff;border:1px solid var(--border2);border-radius:5px;padding:6px 8px;font-size:11px;font-family:inherit;color:var(--text);outline:none;resize:none;min-height:54px;line-height:1.6;"
+        oninput="updateTimeline(${i},'text',this.value)">${step.text}</textarea>
+    `;
+    container.appendChild(item);
+  });
+}
+
+window.updateTimeline = (i, key, val) => { state.rel.timeline[i][key] = val; renderCard(); };
+window.removeTimeline = (i) => { state.rel.timeline.splice(i,1); renderTimelineEditor(); renderCard(); };
+window.setTimelineLabel = (i, label) => { state.rel.timeline[i].label = label; renderTimelineEditor(); renderCard(); };
+
+document.getElementById('add-timeline-btn').onclick = () => {
+  state.rel.timeline.push({ label:'새 단계', text:'내용을 입력하세요.' });
+  renderTimelineEditor();
+  renderCard();
+};
+
+function renderOutputTimeline(acc, solid) {
+  const el = document.getElementById('out-timeline');
+  el.innerHTML = '';
+  const labelColor = state.rel.tlLabelColor || solid;
+  const barColor   = state.rel.tlBarColor   || solid;
+  const textColor  = state.rel.tlTextColor  || '#555555';
+  state.rel.timeline.forEach(step => {
+    const item = document.createElement('div');
+    item.className = 'tl-item';
+    item.innerHTML = `
+      <div class="tl-dot" style="background:${barColor};box-shadow:0 0 0 1.5px ${barColor};"></div>
+      <div class="tl-label" style="color:${labelColor};">${step.label}</div>
+      <div class="tl-text" style="color:${textColor};">${step.text}</div>
+    `;
+    el.appendChild(item);
+  });
+  // 타임라인 세로선 색상도 업데이트
+  el.style.setProperty('--tl-line-color', barColor);
+}
+
+renderTimelineEditor();
+
+// 타임라인 색상 피커
+document.getElementById('tl-label-color').oninput = function() { state.rel.tlLabelColor = this.value; renderCard(); };
+document.getElementById('tl-bar-color').oninput   = function() { state.rel.tlBarColor   = this.value; renderCard(); };
+document.getElementById('tl-text-color').oninput  = function() { state.rel.tlTextColor  = this.value; renderCard(); };
+
+/* ═══════════════════════════════════════
+   DESIGN CONTROLS
+═══════════════════════════════════════ */
+
+// 현재 테마를 CSS 문자열로 반환 (단색 or 그라데이션)
+function getAccentStyle() {
+  const d = state.design;
+  if (d.useGradient) return `linear-gradient(${d.gradDir}deg, ${d.gradC1}, ${d.gradC2})`;
+  return d.accent;
+}
+// 그라데이션일 때 대표 단색(첫번째 색) 반환 — CSS var, box-shadow 등에 사용
+function getAccentSolid() {
+  return state.design.useGradient ? state.design.gradC1 : state.design.accent;
+}
+
+function updateGradPreview() {
+  document.getElementById('grad-preview-bar').style.background = getAccentStyle();
+}
+
+function applyTheme() {
+  const solid = getAccentSolid();
+  document.documentElement.style.setProperty('--accent', solid);
+  document.documentElement.style.setProperty('--accent2', solid);
+  document.documentElement.style.setProperty('--accent-light', hexToRgba(solid, 0.12));
+}
+
+function hexToRgba(hex, a) {
+  const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return r ? `rgba(${parseInt(r[1],16)},${parseInt(r[2],16)},${parseInt(r[3],16)},${a})` : `rgba(192,57,43,${a})`;
+}
+
+function allPresetBtns() {
+  return document.querySelectorAll('.color-theme-btn');
+}
+
+// 단색 + 그라데이션 프리셋 버튼
+document.querySelectorAll('.color-theme-btn').forEach(btn => {
+  btn.onclick = function() {
+    allPresetBtns().forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    const isGrad = this.dataset.grad === 'true';
+    state.design.useGradient = isGrad;
+    if (isGrad) {
+      state.design.gradC1 = this.dataset.c1;
+      state.design.gradC2 = this.dataset.c2;
+      state.design.gradDir = +this.dataset.dir;
+      document.getElementById('grad-c1').value = this.dataset.c1;
+      document.getElementById('grad-c2').value = this.dataset.c2;
+      document.getElementById('use-gradient').checked = true;
+    } else {
+      state.design.accent = this.dataset.c1;
+      state.design.gradC1 = this.dataset.c1;
+      document.getElementById('grad-c1').value = this.dataset.c1;
+      document.getElementById('use-gradient').checked = false;
+    }
+    updateDirBtns();
+    updateGradPreview();
+    applyTheme();
+    renderCard();
+  };
+});
+
+// 색상1
+document.getElementById('grad-c1').oninput = function() {
+  if (state.design.useGradient) state.design.gradC1 = this.value;
+  else { state.design.accent = this.value; state.design.gradC1 = this.value; }
+  allPresetBtns().forEach(b => b.classList.remove('active'));
+  updateGradPreview();
+  applyTheme();
+  renderCard();
+};
+// 색상2
+document.getElementById('grad-c2').oninput = function() {
+  state.design.gradC2 = this.value;
+  updateGradPreview();
+  applyTheme();
+  renderCard();
+};
+// 그라데이션 토글
+document.getElementById('use-gradient').onchange = function() {
+  state.design.useGradient = this.checked;
+  allPresetBtns().forEach(b => b.classList.remove('active'));
+  updateGradPreview();
+  applyTheme();
+  renderCard();
+};
+// 방향 버튼
+function updateDirBtns() {
+  document.querySelectorAll('.dir-btn').forEach(b => {
+    b.classList.toggle('active', +b.dataset.deg === state.design.gradDir);
+  });
+}
+document.querySelectorAll('.dir-btn').forEach(btn => {
+  btn.onclick = function() {
+    state.design.gradDir = +this.dataset.deg;
+    updateDirBtns();
+    updateGradPreview();
+    renderCard();
+  };
+});
+
+document.getElementById('card-bg').oninput = function() {
+  state.design.cardBg = this.value;
+  renderCard();
+};
+document.getElementById('header-text-color').oninput = function() {
+  state.design.headerTextColor = this.value;
+  renderCard();
+};
+document.getElementById('c1-tag-style').onchange = function() { state.c1.tagStyle = this.value; renderCard(); };
+document.getElementById('c2-tag-style').onchange = function() { state.c2.tagStyle = this.value; renderCard(); };
+document.getElementById('card-width').oninput = function() {
+  state.design.cardWidth = +this.value;
+  document.getElementById('v-cardwidth').textContent = this.value + 'px';
+  document.getElementById('card-output').style.width = this.value + 'px';
+};
+
+// 말풍선 색
+['bubble-c1','bubble-c1-text','bubble-c2','bubble-c2-text'].forEach(id => {
+  document.getElementById(id).oninput = function() {
+    const key = id.replace(/-([a-z])/g, (_, c) => c.toUpperCase()); // camelCase
+    state.design[key] = this.value;
+    renderCard();
+  };
+});
+
+// 이름 색상
+document.getElementById('c1-name-color').oninput = function() { state.c1.nameColor = this.value; renderCard(); };
+document.getElementById('c2-name-color').oninput = function() { state.c2.nameColor = this.value; renderCard(); };
+
+// 한마디 색상
+document.getElementById('c1-catchphrase-color').oninput = function() { state.c1.catchphraseColor = this.value; renderCard(); };
+document.getElementById('c2-catchphrase-color').oninput = function() { state.c2.catchphraseColor = this.value; renderCard(); };
+
+// 성별·나이·소속 색상
+document.getElementById('c1-info-color').oninput = function() { state.c1.infoColor = this.value; renderCard(); };
+document.getElementById('c2-info-color').oninput = function() { state.c2.infoColor = this.value; renderCard(); };
+
+// 소개 막대/글자 색상
+document.getElementById('c1-desc-bar-color').oninput  = function() { state.c1.descBarColor  = this.value; renderCard(); };
+document.getElementById('c1-desc-text-color').oninput = function() { state.c1.descTextColor = this.value; renderCard(); };
+document.getElementById('c2-desc-bar-color').oninput  = function() { state.c2.descBarColor  = this.value; renderCard(); };
+document.getElementById('c2-desc-text-color').oninput = function() { state.c2.descTextColor = this.value; renderCard(); };
+
+/* ═══════════════════════════════════════
+   RENDER CARD
+═══════════════════════════════════════ */
+function renderCard() {
+  const acc = getAccentStyle();   // 그라데이션 or 단색 (background용)
+  const solid = getAccentSolid(); // 단색만 (color, border 등)
+  const htc = state.design.headerTextColor;
+
+  // Header
+  const hdr = document.getElementById('card-header-el');
+  hdr.style.background = acc;
+  hdr.style.color = htc;
+  document.getElementById('out-type').textContent = state.rel.type;
+  document.getElementById('out-world').textContent = state.rel.world;
+
+  // Card bg
+  document.getElementById('card-output').style.background = state.design.cardBg;
+  document.getElementById('card-output').style.setProperty('--c-accent', solid);
+
+  // Char A
+  const c1nameEl = document.getElementById('out-c1-name');
+  c1nameEl.textContent = state.c1.name;
+  c1nameEl.style.color = state.c1.nameColor;
+  const c1catchEl = document.getElementById('out-c1-catchphrase');
+  c1catchEl.textContent = state.c1.catchphrase;
+  c1catchEl.style.color = state.c1.catchphraseColor;
+  const c1infoEl = document.getElementById('out-c1-info');
+  c1infoEl.textContent = [state.c1.age, state.c1.affil].filter(Boolean).join(' | ');
+  c1infoEl.style.color = state.c1.infoColor;
+  renderDesc('out-c1-desc', state.c1.desc, state.c1.descBarColor, state.c1.descTextColor);
+
+  // Char A image
+  const c1wrap = document.getElementById('c1-img-wrap');
+  c1wrap.innerHTML = state.c1.img
+    ? `<img src="${state.c1.img}" style="width:100%;height:100%;object-fit:cover;">`
+    : `<div class="char-img-placeholder">👤</div>`;
+
+  // Char A tags
+  renderOutputTags('out-c1-tags', state.c1.tags, state.c1.tagStyle, acc, solid);
+  // Char A reviews
+  renderOutputReviews('out-c1-reviews', state.c1.reviews, solid);
+
+  // Char B
+  const c2nameEl = document.getElementById('out-c2-name');
+  c2nameEl.textContent = state.c2.name;
+  c2nameEl.style.color = state.c2.nameColor;
+  const c2catchEl = document.getElementById('out-c2-catchphrase');
+  c2catchEl.textContent = state.c2.catchphrase;
+  c2catchEl.style.color = state.c2.catchphraseColor;
+  const c2infoEl = document.getElementById('out-c2-info');
+  c2infoEl.textContent = [state.c2.age, state.c2.affil].filter(Boolean).join(' | ');
+  c2infoEl.style.color = state.c2.infoColor;
+  renderDesc('out-c2-desc', state.c2.desc, state.c2.descBarColor, state.c2.descTextColor);
+
+  const c2wrap = document.getElementById('c2-img-wrap');
+  c2wrap.innerHTML = state.c2.img
+    ? `<img src="${state.c2.img}" style="width:100%;height:100%;object-fit:cover;">`
+    : `<div class="char-img-placeholder">👤</div>`;
+
+  renderOutputTags('out-c2-tags', state.c2.tags, state.c2.tagStyle, acc, solid);
+  renderOutputReviews('out-c2-reviews', state.c2.reviews, solid);
+
+  // Relation meters
+  const relTagsEl = document.getElementById('out-rel-tags');
+  relTagsEl.innerHTML = '';
+  state.rel.meters.forEach(m => {
+    const row = document.createElement('div');
+    row.className = 'meter-row';
+    const pct = Math.max(0, Math.min(100, m.value));
+    row.innerHTML = `
+      <div class="meter-labels">
+        <span class="meter-label-left" style="color:${solid};">${m.left}</span>
+        <span class="meter-label-right" style="color:${solid};">${m.right}</span>
+      </div>
+      <div class="meter-track">
+        <div class="meter-fill" style="width:${pct}%;background:${acc};"></div>
+        <div class="meter-dot" style="left:${pct}%;background:${solid};"></div>
+      </div>
+    `;
+    relTagsEl.appendChild(row);
+  });
+
+  // Chat
+  const chatEl = document.getElementById('out-chat');
+  chatEl.innerHTML = '';
+  state.rel.chat.forEach(msg => {
+    const bub = document.createElement('div');
+    bub.className = 'chat-bubble ' + msg.side;
+    bub.textContent = msg.text;
+    if (msg.side === 'left') {
+      bub.style.background = state.design.bubbleC1;
+      bub.style.color = state.design.bubbleC1Text;
+    } else if (msg.side === 'right') {
+      bub.style.background = state.design.bubbleC2;
+      bub.style.color = state.design.bubbleC2Text;
+    }
+    chatEl.appendChild(bub);
+  });
+
+  // Timeline
+  renderOutputTimeline(acc, solid);
+
+  // Accent text
+  document.querySelectorAll('.plus-circle').forEach(el => { el.style.borderColor = solid; el.style.color = solid; });
+  document.querySelectorAll('.card-footer-tag').forEach(el => { el.style.color = acc; });
+}
+
+function renderDesc(containerId, text, barColor, textColor) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  const lines = text.split('\n').filter(l => l.trim() !== '');
+  lines.forEach(line => {
+    const row = document.createElement('div');
+    row.className = 'char-desc-line';
+    const bar = document.createElement('div');
+    bar.className = 'char-desc-bar';
+    bar.style.background = barColor;
+    const txt = document.createElement('div');
+    txt.className = 'char-desc-text';
+    txt.style.color = textColor;
+    txt.textContent = line;
+    row.appendChild(bar);
+    row.appendChild(txt);
+    el.appendChild(row);
+  });
+}
+
+function renderOutputTags(containerId, tags, style, acc, solid) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  tags.forEach(tag => {
+    const span = document.createElement('span');
+    span.className = `char-tag style-${style}`;
+    span.textContent = tag;
+    if (style === 'filled') { span.style.background = acc; span.style.color = '#fff'; span.style.border = 'none'; }
+    else if (style === 'outline') { span.style.borderColor = solid; span.style.color = solid; }
+    el.appendChild(span);
+  });
+}
+
+function renderOutputReviews(containerId, reviews, acc) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  reviews.forEach(rev => {
+    const div = document.createElement('div');
+    div.className = 'review-card';
+    let starsHtml = '';
+    for (let n = 1; n <= 5; n++) {
+      starsHtml += `<span class="review-star ${n <= rev.score ? '' : 'empty'}">★</span>`;
+    }
+    div.innerHTML = `
+      <div class="review-card-head">
+        <div class="review-stars">${starsHtml}</div>
+        <div class="review-score">${rev.score}.0</div>
+        <div class="review-author">${rev.author}</div>
+      </div>
+      <div class="review-text">${rev.text}</div>
+    `;
+    el.appendChild(div);
+  });
+}
+
+/* ═══════════════════════════════════════
+   EXPORT PNG
+═══════════════════════════════════════ */
+document.getElementById('btn-export').onclick = async () => {
+  showToast('이미지 생성 중...');
+  try {
+    const canvas = await html2canvas(document.getElementById('card-output'), {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: state.design.cardBg,
+      logging: false
+    });
+    const link = document.createElement('a');
+    link.download = `characard-${state.c1.name}-${state.c2.name}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    showToast('저장 완료! 🎉');
+  } catch(e) {
+    showToast('저장 실패. 다시 시도해주세요.');
+  }
+};
+
+/* ═══════════════════════════════════════
+   RESET
+═══════════════════════════════════════ */
+document.getElementById('btn-reset').onclick = () => {
+  if (!confirm('모든 내용을 초기화할까요?')) return;
+  location.reload();
+};
+
+/* ═══════════════════════════════════════
+   TOAST
+═══════════════════════════════════════ */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+/* ═══════════════════════════════════════
+   INIT
+═══════════════════════════════════════ */
+renderCard();
+</script>
+</body>
+</html>
