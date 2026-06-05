@@ -1402,6 +1402,7 @@ document.addEventListener('mousedown', e => {
   };
   wrap.style.cursor = 'grabbing';
   e.preventDefault();
+  e.stopPropagation();
 });
 
 document.addEventListener('mousemove', e => {
@@ -1446,9 +1447,6 @@ document.addEventListener('touchmove', e => {
 }, {passive:true});
 
 document.addEventListener('touchend', () => { imgDragState = null; });
-
-setupImgDrag('c1-img-wrap', state.c1);
-setupImgDrag('c2-img-wrap', state.c2);
 
 /* ═══════════════════════════════════════
    TAGS
@@ -2120,6 +2118,27 @@ function renderOutputReviews(containerId, reviews, textColor, bgColor, starColor
 document.getElementById('btn-export').onclick = async () => {
   showToast('이미지 생성 중...');
   try {
+    // html2canvas가 object-fit:cover를 무시하므로
+    // 저장 전에 img → background-image 방식으로 변환
+    const wraps = [
+      { el: document.getElementById('c1-img-wrap'), pos: state.c1.imgPos },
+      { el: document.getElementById('c2-img-wrap'), pos: state.c2.imgPos }
+    ];
+    // 원래 내용 백업 및 변환
+    const backups = wraps.map(({ el, pos }) => {
+      const img = el.querySelector('img');
+      const original = el.innerHTML;
+      if (img) {
+        el.innerHTML = '';
+        el.style.backgroundImage = `url('${img.src}')`;
+        el.style.backgroundSize = 'cover';
+        el.style.backgroundPosition = `${pos.x}% ${pos.y}%`;
+        el.style.backgroundRepeat = 'no-repeat';
+      }
+      return { el, original };
+    });
+
+    const prev = state.selectedLayer;
     const canvas = await html2canvas(document.getElementById('card-output'), {
       scale: 2,
       useCORS: true,
@@ -2127,6 +2146,16 @@ document.getElementById('btn-export').onclick = async () => {
       backgroundColor: state.design.cardBg,
       logging: false
     });
+
+    // 원래대로 복원
+    backups.forEach(({ el, original }) => {
+      el.innerHTML = original;
+      el.style.backgroundImage = '';
+      el.style.backgroundSize = '';
+      el.style.backgroundPosition = '';
+      el.style.backgroundRepeat = '';
+    });
+
     const link = document.createElement('a');
     link.download = `characard-${state.c1.name}-${state.c2.name}.png`;
     link.href = canvas.toDataURL('image/png');
@@ -2134,6 +2163,7 @@ document.getElementById('btn-export').onclick = async () => {
     showToast('저장 완료! 🎉');
   } catch(e) {
     showToast('저장 실패. 다시 시도해주세요.');
+    console.error(e);
   }
 };
 
