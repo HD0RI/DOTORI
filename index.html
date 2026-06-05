@@ -1388,11 +1388,11 @@ function renderMeterEditor() {
 
     // 상단 행: 왼쪽 레이블 / 화살표 / 오른쪽 레이블 / 프리셋토글 / 삭제
     const topRow = document.createElement('div');
-    topRow.style.cssText = 'display:flex;gap:5px;align-items:center;';
+    topRow.style.cssText = 'display:flex;gap:5px;align-items:center;flex-wrap:nowrap;';
 
     const leftInput = document.createElement('input');
     leftInput.type = 'text'; leftInput.value = m.left; leftInput.placeholder = '왼쪽';
-    leftInput.style.cssText = 'flex:1;min-width:0;background:#fff;border:1px solid var(--border2);border-radius:5px;padding:3px 6px;font-size:11px;font-family:inherit;color:var(--text);outline:none;';
+    leftInput.style.cssText = 'width:72px;flex-shrink:0;background:#fff;border:1px solid var(--border2);border-radius:5px;padding:3px 6px;font-size:11px;font-family:inherit;color:var(--text);outline:none;';
     leftInput.oninput = () => { state.rel.meters[i].left = leftInput.value; renderCard(); };
 
     const arrow = document.createElement('span');
@@ -1400,7 +1400,7 @@ function renderMeterEditor() {
 
     const rightInput = document.createElement('input');
     rightInput.type = 'text'; rightInput.value = m.right; rightInput.placeholder = '오른쪽';
-    rightInput.style.cssText = 'flex:1;min-width:0;background:#fff;border:1px solid var(--border2);border-radius:5px;padding:3px 6px;font-size:11px;font-family:inherit;color:var(--text);outline:none;';
+    rightInput.style.cssText = 'width:72px;flex-shrink:0;background:#fff;border:1px solid var(--border2);border-radius:5px;padding:3px 6px;font-size:11px;font-family:inherit;color:var(--text);outline:none;';
     rightInput.oninput = () => { state.rel.meters[i].right = rightInput.value; renderCard(); };
 
     // 프리셋 토글 버튼
