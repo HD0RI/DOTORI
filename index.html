@@ -737,6 +737,9 @@ body {
   border: 2px solid #fff;
   box-shadow: 0 1px 4px rgba(0,0,0,0.2);
 }
+
+/* Divider line with icon */
+.center-divider {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1033,6 +1036,20 @@ select option { background: #fff; color: #1a1a1a; }
       </div>
 
       <div class="section-title">● 관계 수치 슬라이더</div>
+      <div style="background:var(--bg-panel2);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:11px;color:var(--text3);">채워진 색</span>
+          <input type="color" id="meter-fill-color" value="#c0392b" style="width:26px;height:26px;border:none;border-radius:5px;cursor:pointer;">
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:11px;color:var(--text3);">빈 색</span>
+          <input type="color" id="meter-empty-color" value="#dddddd" style="width:26px;height:26px;border:none;border-radius:5px;cursor:pointer;">
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:11px;color:var(--text3);">레이블 색</span>
+          <input type="color" id="meter-label-color" value="#333333" style="width:26px;height:26px;border:none;border-radius:5px;cursor:pointer;">
+        </div>
+      </div>
       <div id="meter-editor" style="display:flex;flex-direction:column;gap:10px;margin-bottom:8px;"></div>
       <button class="add-chat-btn" id="add-meter-btn">+ 수치 추가</button>
 
@@ -1243,7 +1260,7 @@ select option { background: #fff; color: #1a1a1a; }
 const state = {
   c1: { name:'캐릭터이름1', nameColor:'#1a1a1a', catchphrase:'', catchphraseColor:'#555555', age:'성별 | 나이', affil:'소속 / 직업', infoColor:'#888799', desc:'캐릭터이름1에 대한 소개를 입력하세요.', descBarColor:'#c0392b', descTextColor:'#555555', tagStyle:'filled', img:null, tags:[], reviews:[] },
   c2: { name:'캐릭터이름2', nameColor:'#1a1a1a', catchphrase:'', catchphraseColor:'#555555', age:'성별 | 나이', affil:'소속 / 직업', infoColor:'#888799', desc:'캐릭터이름2에 대한 소개를 입력하세요.', descBarColor:'#c0392b', descTextColor:'#555555', tagStyle:'filled', img:null, tags:[], reviews:[] },
-  rel: { type:'페어명', world:'캐릭터이름1 with 캐릭터이름2', meters:[ {left:'적대감', right:'친밀감', value:30}, {left:'불신', right:'신뢰', value:50}, {left:'거리감', right:'의존', value:20} ], chat:[ {side:'left', text:'캐릭터이름1의 대사'}, {side:'right', text:'캐릭터이름2의 대사'} ], timeline:[ {label:'만남', text:'두 사람의 첫 만남을 입력하세요.'}, {label:'갈등', text:'갈등과 긴장감을 입력하세요.'}, {label:'전환점', text:'관계의 전환점을 입력하세요.'} ], tlLabelColor:'#c0392b', tlBarColor:'#c0392b', tlTextColor:'#555555' },
+  rel: { type:'페어명', world:'캐릭터이름1 with 캐릭터이름2', meters:[ {left:'적대감', right:'친밀감', value:30}, {left:'불신', right:'신뢰', value:50}, {left:'거리감', right:'의존', value:20} ], meterFillColor:'#c0392b', meterEmptyColor:'#dddddd', meterLabelColor:'#333333', chat:[ {side:'left', text:'캐릭터이름1의 대사'}, {side:'right', text:'캐릭터이름2의 대사'} ], timeline:[ {label:'만남', text:'두 사람의 첫 만남을 입력하세요.'}, {label:'갈등', text:'갈등과 긴장감을 입력하세요.'}, {label:'전환점', text:'관계의 전환점을 입력하세요.'} ], tlLabelColor:'#c0392b', tlBarColor:'#c0392b', tlTextColor:'#555555' },
   design: { accent:'#c0392b', useGradient:false, gradC1:'#c0392b', gradC2:'#c0392b', gradDir:135, cardBg:'#ffffff', tagStyle:'filled', cardWidth:900, headerTextColor:'#ffffff', bubbleC1:'#ebebeb', bubbleC1Text:'#1a1a1a', bubbleC2:'#c0392b', bubbleC2Text:'#ffffff' }
 };
 
@@ -1367,28 +1384,68 @@ function renderMeterEditor() {
   container.innerHTML = '';
   state.rel.meters.forEach((m, i) => {
     const item = document.createElement('div');
-    item.style.cssText = 'background:var(--bg-panel2);border:1.5px solid var(--border);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:7px;';
-    item.innerHTML = `
-      <div style="display:flex;gap:6px;align-items:center;">
-        <input type="text" value="${m.left}" placeholder="왼쪽 레이블"
-          style="flex:1;background:#fff;border:1px solid var(--border2);border-radius:5px;padding:4px 7px;font-size:11px;font-family:inherit;color:var(--text);outline:none;"
-          oninput="updateMeter(${i},'left',this.value)">
-        <span style="font-size:11px;color:var(--text3);">←●→</span>
-        <input type="text" value="${m.right}" placeholder="오른쪽 레이블"
-          style="flex:1;background:#fff;border:1px solid var(--border2);border-radius:5px;padding:4px 7px;font-size:11px;font-family:inherit;color:var(--text);outline:none;"
-          oninput="updateMeter(${i},'right',this.value)">
-        <button onclick="removeMeter(${i})" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:0 2px;" onmouseover="this.style.color='#e74c3c'" onmouseout="this.style.color=''">✕</button>
-      </div>
-      <div style="display:flex;gap:4px;flex-wrap:wrap;">
-        ${METER_PRESETS.map(p=>`<button onclick="setMeterPreset(${i},'${p.left}','${p.right}')" style="background:var(--accent-light);border:1px solid rgba(192,57,43,0.15);color:var(--accent);border-radius:10px;padding:2px 7px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;">${p.left}↔${p.right}</button>`).join('')}
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span style="font-size:10px;color:var(--text3);min-width:28px;">${m.value}%</span>
-        <input type="range" min="0" max="100" value="${m.value}"
-          style="flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--border2);outline:none;cursor:pointer;"
-          oninput="updateMeter(${i},'value',+this.value); this.previousElementSibling.textContent=this.value+'%'">
-      </div>
-    `;
+    item.style.cssText = 'background:var(--bg-panel2);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:6px;';
+
+    // 상단 행: 왼쪽 레이블 / 화살표 / 오른쪽 레이블 / 프리셋토글 / 삭제
+    const topRow = document.createElement('div');
+    topRow.style.cssText = 'display:flex;gap:5px;align-items:center;';
+
+    const leftInput = document.createElement('input');
+    leftInput.type = 'text'; leftInput.value = m.left; leftInput.placeholder = '왼쪽';
+    leftInput.style.cssText = 'flex:1;min-width:0;background:#fff;border:1px solid var(--border2);border-radius:5px;padding:3px 6px;font-size:11px;font-family:inherit;color:var(--text);outline:none;';
+    leftInput.oninput = () => { state.rel.meters[i].left = leftInput.value; renderCard(); };
+
+    const arrow = document.createElement('span');
+    arrow.textContent = '↔'; arrow.style.cssText = 'font-size:11px;color:var(--text3);flex-shrink:0;';
+
+    const rightInput = document.createElement('input');
+    rightInput.type = 'text'; rightInput.value = m.right; rightInput.placeholder = '오른쪽';
+    rightInput.style.cssText = 'flex:1;min-width:0;background:#fff;border:1px solid var(--border2);border-radius:5px;padding:3px 6px;font-size:11px;font-family:inherit;color:var(--text);outline:none;';
+    rightInput.oninput = () => { state.rel.meters[i].right = rightInput.value; renderCard(); };
+
+    // 프리셋 토글 버튼
+    const toggleBtn = document.createElement('button');
+    toggleBtn.textContent = '▾';
+    toggleBtn.title = '프리셋';
+    toggleBtn.style.cssText = 'background:var(--bg-panel);border:1px solid var(--border2);border-radius:5px;cursor:pointer;color:var(--text3);font-size:11px;padding:2px 6px;flex-shrink:0;';
+
+    const delBtn = document.createElement('button');
+    delBtn.textContent = '✕';
+    delBtn.style.cssText = 'background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;padding:0 3px;flex-shrink:0;';
+    delBtn.onmouseover = () => delBtn.style.color = '#e74c3c';
+    delBtn.onmouseout  = () => delBtn.style.color = '';
+    delBtn.onclick = () => { state.rel.meters.splice(i, 1); renderMeterEditor(); renderCard(); };
+
+    topRow.append(leftInput, arrow, rightInput, toggleBtn, delBtn);
+
+    // 프리셋 행 (기본 숨김)
+    const presetRow = document.createElement('div');
+    presetRow.style.cssText = 'display:none;gap:4px;flex-wrap:wrap;';
+    METER_PRESETS.forEach(p => {
+      const pb = document.createElement('button');
+      pb.textContent = `${p.left}↔${p.right}`;
+      pb.style.cssText = 'background:var(--accent-light);border:1px solid rgba(192,57,43,0.15);color:var(--accent);border-radius:10px;padding:2px 6px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;';
+      pb.onclick = () => { state.rel.meters[i].left = p.left; state.rel.meters[i].right = p.right; renderMeterEditor(); renderCard(); };
+      presetRow.appendChild(pb);
+    });
+    toggleBtn.onclick = () => {
+      const open = presetRow.style.display === 'flex';
+      presetRow.style.display = open ? 'none' : 'flex';
+      toggleBtn.textContent = open ? '▾' : '▴';
+    };
+
+    // 슬라이더 행
+    const sliderRow = document.createElement('div');
+    sliderRow.style.cssText = 'display:flex;align-items:center;gap:6px;';
+    const valLabel = document.createElement('span');
+    valLabel.textContent = m.value + '%'; valLabel.style.cssText = 'font-size:10px;color:var(--text3);min-width:26px;';
+    const slider = document.createElement('input');
+    slider.type = 'range'; slider.min = 0; slider.max = 100; slider.value = m.value;
+    slider.style.cssText = 'flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--border2);outline:none;cursor:pointer;';
+    slider.oninput = () => { state.rel.meters[i].value = +slider.value; valLabel.textContent = slider.value + '%'; renderCard(); };
+    sliderRow.append(valLabel, slider);
+
+    item.append(topRow, presetRow, sliderRow);
     container.appendChild(item);
   });
 }
@@ -1560,6 +1617,11 @@ renderTimelineEditor();
 document.getElementById('tl-label-color').oninput = function() { state.rel.tlLabelColor = this.value; renderCard(); };
 document.getElementById('tl-bar-color').oninput   = function() { state.rel.tlBarColor   = this.value; renderCard(); };
 document.getElementById('tl-text-color').oninput  = function() { state.rel.tlTextColor  = this.value; renderCard(); };
+
+// 미터 색상 피커
+document.getElementById('meter-fill-color').oninput  = function() { state.rel.meterFillColor  = this.value; renderCard(); };
+document.getElementById('meter-empty-color').oninput = function() { state.rel.meterEmptyColor = this.value; renderCard(); };
+document.getElementById('meter-label-color').oninput = function() { state.rel.meterLabelColor = this.value; renderCard(); };
 
 /* ═══════════════════════════════════════
    DESIGN CONTROLS
@@ -1770,18 +1832,21 @@ function renderCard() {
   // Relation meters
   const relTagsEl = document.getElementById('out-rel-tags');
   relTagsEl.innerHTML = '';
+  const mFill  = state.rel.meterFillColor  || solid;
+  const mEmpty = state.rel.meterEmptyColor || '#dddddd';
+  const mLabel = state.rel.meterLabelColor || '#333333';
   state.rel.meters.forEach(m => {
     const row = document.createElement('div');
     row.className = 'meter-row';
     const pct = Math.max(0, Math.min(100, m.value));
     row.innerHTML = `
       <div class="meter-labels">
-        <span class="meter-label-left" style="color:${solid};">${m.left}</span>
-        <span class="meter-label-right" style="color:${solid};">${m.right}</span>
+        <span class="meter-label-left" style="color:${mLabel};">${m.left}</span>
+        <span class="meter-label-right" style="color:${mLabel};">${m.right}</span>
       </div>
-      <div class="meter-track">
-        <div class="meter-fill" style="width:${pct}%;background:${acc};"></div>
-        <div class="meter-dot" style="left:${pct}%;background:${solid};"></div>
+      <div class="meter-track" style="background:${mEmpty};">
+        <div class="meter-fill" style="width:${pct}%;background:${mFill};"></div>
+        <div class="meter-dot" style="left:${pct}%;background:${mFill};"></div>
       </div>
     `;
     relTagsEl.appendChild(row);
