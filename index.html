@@ -515,15 +515,15 @@ body {
   width: 100%;
   height: 320px;
   border-radius: 8px;
-  overflow: hidden;
+  overflow: visible;
   border: none;
   background: transparent;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   margin-bottom: 10px;
 }
-.char-img-wrap img { width: 100%; height: 100%; object-fit: contain; object-position: center; }
+.char-img-wrap img { width: 100%; height: 100%; object-fit: contain; object-position: top center; }
 .char-img-placeholder {
   width: 100%; height: 100%;
   display: flex;
@@ -626,11 +626,11 @@ body {
   display: flex;
   flex-direction: column;
 }
-.relation-tags { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.relation-tags { display: flex; flex-direction: column; gap: 8px; margin-bottom: 28px; }
 
 /* Chat bubble */
 .chat-section { margin-bottom: 16px; }
-.chat-bubble-list { display: flex; flex-direction: column; gap: 6px; }
+.chat-bubble-list { display: flex; flex-direction: column; gap: 11px; }
 .chat-bubble {
   max-width: 88%;
   padding: 7px 11px;
@@ -965,6 +965,14 @@ select option { background: #fff; color: #1a1a1a; }
       </div>
 
       <div class="section-title">● 한줄 리뷰</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+        <span style="font-size:11px;color:var(--text3);">글자색</span>
+        <input type="color" id="c1-review-text-color" value="#333333" style="width:24px;height:24px;border:none;border-radius:4px;cursor:pointer;">
+        <span style="font-size:11px;color:var(--text3);">배경색</span>
+        <input type="color" id="c1-review-bg-color" value="#f7f5f2" style="width:24px;height:24px;border:none;border-radius:4px;cursor:pointer;">
+        <span style="font-size:11px;color:var(--text3);">별색</span>
+        <input type="color" id="c1-review-star-color" value="#f5a623" style="width:24px;height:24px;border:none;border-radius:4px;cursor:pointer;">
+      </div>
       <div id="c1-reviews"></div>
       <button class="add-chat-btn" id="c1-add-review">+ 리뷰 추가</button>
     </div>
@@ -1045,6 +1053,14 @@ select option { background: #fff; color: #1a1a1a; }
       </div>
 
       <div class="section-title">● 한줄 리뷰</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+        <span style="font-size:11px;color:var(--text3);">글자색</span>
+        <input type="color" id="c2-review-text-color" value="#333333" style="width:24px;height:24px;border:none;border-radius:4px;cursor:pointer;">
+        <span style="font-size:11px;color:var(--text3);">배경색</span>
+        <input type="color" id="c2-review-bg-color" value="#f7f5f2" style="width:24px;height:24px;border:none;border-radius:4px;cursor:pointer;">
+        <span style="font-size:11px;color:var(--text3);">별색</span>
+        <input type="color" id="c2-review-star-color" value="#f5a623" style="width:24px;height:24px;border:none;border-radius:4px;cursor:pointer;">
+      </div>
       <div id="c2-reviews"></div>
       <button class="add-chat-btn" id="c2-add-review">+ 리뷰 추가</button>
     </div>
@@ -1288,8 +1304,8 @@ select option { background: #fff; color: #1a1a1a; }
    STATE
 ═══════════════════════════════════════ */
 const state = {
-  c1: { name:'캐릭터이름1', nameColor:'#1a1a1a', catchphrase:'', catchphraseColor:'#555555', age:'성별 | 나이', affil:'소속 / 직업', infoColor:'#888799', desc:'캐릭터이름1에 대한 소개를 입력하세요.', descBarColor:'#c0392b', descTextColor:'#555555', tagStyle:'filled', tagBgColor:'#c0392b', tagTextColor:'#ffffff', img:null, tags:[], reviews:[] },
-  c2: { name:'캐릭터이름2', nameColor:'#1a1a1a', catchphrase:'', catchphraseColor:'#555555', age:'성별 | 나이', affil:'소속 / 직업', infoColor:'#888799', desc:'캐릭터이름2에 대한 소개를 입력하세요.', descBarColor:'#c0392b', descTextColor:'#555555', tagStyle:'filled', tagBgColor:'#c0392b', tagTextColor:'#ffffff', img:null, tags:[], reviews:[] },
+  c1: { name:'캐릭터이름1', nameColor:'#1a1a1a', catchphrase:'', catchphraseColor:'#555555', age:'성별 | 나이', affil:'소속 / 직업', infoColor:'#888799', desc:'캐릭터이름1에 대한 소개를 입력하세요.', descBarColor:'#c0392b', descTextColor:'#555555', tagStyle:'filled', tagBgColor:'#c0392b', tagTextColor:'#ffffff', reviewTextColor:'#333333', reviewBgColor:'#f7f5f2', reviewStarColor:'#f5a623', img:null, tags:[], reviews:[] },
+  c2: { name:'캐릭터이름2', nameColor:'#1a1a1a', catchphrase:'', catchphraseColor:'#555555', age:'성별 | 나이', affil:'소속 / 직업', infoColor:'#888799', desc:'캐릭터이름2에 대한 소개를 입력하세요.', descBarColor:'#c0392b', descTextColor:'#555555', tagStyle:'filled', tagBgColor:'#c0392b', tagTextColor:'#ffffff', reviewTextColor:'#333333', reviewBgColor:'#f7f5f2', reviewStarColor:'#f5a623', img:null, tags:[], reviews:[] },
   rel: { type:'페어명', world:'캐릭터이름1 with 캐릭터이름2', meters:[ {left:'적대감', right:'친밀감', value:30}, {left:'불신', right:'신뢰', value:50}, {left:'거리감', right:'의존', value:20} ], meterFillColor:'#c0392b', meterEmptyColor:'#dddddd', meterLabelColor:'#333333', meterDotShape:'circle', chat:[ {side:'left', text:'캐릭터이름1의 대사'}, {side:'right', text:'캐릭터이름2의 대사'} ], timeline:[ {label:'만남', text:'두 사람의 첫 만남을 입력하세요.'}, {label:'갈등', text:'갈등과 긴장감을 입력하세요.'}, {label:'전환점', text:'관계의 전환점을 입력하세요.'} ], tlLabelColor:'#c0392b', tlBarColor:'#c0392b', tlTextColor:'#555555' },
   design: { accent:'#c0392b', useGradient:false, gradC1:'#c0392b', gradC2:'#c0392b', gradDir:135, cardBg:'#ffffff', tagStyle:'filled', cardWidth:900, headerTextColor:'#ffffff', bubbleC1:'#ebebeb', bubbleC1Text:'#1a1a1a', bubbleC2:'#c0392b', bubbleC2Text:'#ffffff' }
 };
@@ -1516,53 +1532,67 @@ function setupReviews(containerId, addBtnId, stateArr) {
   };
   renderEditorReviews(containerId, stateArr);
 }
+
 function renderEditorReviews(containerId, arr) {
   const container = document.getElementById(containerId);
   container.innerHTML = '';
   arr.forEach((rev, i) => {
     const div = document.createElement('div');
     div.className = 'review-item';
-    div.innerHTML = `
-      <div class="review-item-head">
-        <input type="text" placeholder="캐릭터명" value="${rev.author}" style="flex:1;background:#fff;border:1px solid var(--border2);border-radius:5px;padding:3px 7px;font-size:12px;font-family:inherit;outline:none;" oninput="updateReview(${i},'author',this.value,'${containerId}')">
-        <div class="star-input" id="stars-${containerId}-${i}"></div>
-        <button onclick="removeReview(${i},'${containerId}')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:0 4px;">✕</button>
-      </div>
-      <input type="text" placeholder="한줄 코멘트..." value="${rev.text}" style="width:100%;background:#fff;border:1px solid var(--border2);border-radius:5px;padding:5px 8px;font-size:11px;font-family:inherit;outline:none;" oninput="updateReview(${i},'text',this.value,'${containerId}')">
-    `;
+
+    // 상단 행: 작성자 / 별점 / 삭제
+    const head = document.createElement('div');
+    head.className = 'review-item-head';
+
+    const authorInput = document.createElement('input');
+    authorInput.type = 'text'; authorInput.placeholder = '캐릭터명'; authorInput.value = rev.author;
+    authorInput.style.cssText = 'flex:1;background:#fff;border:1px solid var(--border2);border-radius:5px;padding:3px 7px;font-size:12px;font-family:inherit;outline:none;';
+    authorInput.oninput = () => { arr[i].author = authorInput.value; renderCard(); };
+
+    // 별점 — DOM으로 생성해서 클릭 시 재렌더
+    const starWrap = document.createElement('div');
+    starWrap.className = 'star-input';
+    function renderStars() {
+      starWrap.innerHTML = '';
+      for (let n = 1; n <= 5; n++) {
+        const s = document.createElement('span');
+        s.textContent = '★';
+        s.className = n <= arr[i].score ? 'lit' : '';
+        s.style.cursor = 'pointer';
+        s.onclick = () => { arr[i].score = n; renderStars(); renderCard(); };
+        starWrap.appendChild(s);
+      }
+    }
+    renderStars();
+
+    const delBtn = document.createElement('button');
+    delBtn.style.cssText = 'background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:0 4px;';
+    delBtn.textContent = '✕';
+    delBtn.onmouseover = () => delBtn.style.color = '#e74c3c';
+    delBtn.onmouseout  = () => delBtn.style.color = '';
+    delBtn.onclick = () => { arr.splice(i, 1); renderEditorReviews(containerId, arr); renderCard(); };
+
+    head.append(authorInput, starWrap, delBtn);
+
+    const textInput = document.createElement('input');
+    textInput.type = 'text'; textInput.placeholder = '한줄 코멘트...'; textInput.value = rev.text;
+    textInput.style.cssText = 'width:100%;background:#fff;border:1px solid var(--border2);border-radius:5px;padding:5px 8px;font-size:11px;font-family:inherit;outline:none;margin-top:5px;';
+    textInput.oninput = () => { arr[i].text = textInput.value; renderCard(); };
+
+    div.append(head, textInput);
     container.appendChild(div);
-    renderStarInput(`stars-${containerId}-${i}`, rev.score, n => {
-      arr[i].score = n;
-      renderStarInput(`stars-${containerId}-${i}`, n, null, arr[i]);
-      renderCard();
-    });
   });
 }
-function renderStarInput(id, score, onClick) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.innerHTML = '';
-  for (let n = 1; n <= 5; n++) {
-    const s = document.createElement('span');
-    s.textContent = '★';
-    s.className = n <= score ? 'lit' : '';
-    if (onClick) s.onclick = () => onClick(n);
-    el.appendChild(s);
-  }
-}
-window.updateReview = (idx, key, val, containerId) => {
-  const arr = containerId === 'c1-reviews' ? state.c1.reviews : state.c2.reviews;
-  arr[idx][key] = val;
-  renderCard();
-};
-window.removeReview = (idx, containerId) => {
-  const arr = containerId === 'c1-reviews' ? state.c1.reviews : state.c2.reviews;
-  arr.splice(idx,1);
-  renderEditorReviews(containerId, arr);
-  renderCard();
-};
+
 setupReviews('c1-reviews','c1-add-review', state.c1.reviews);
 setupReviews('c2-reviews','c2-add-review', state.c2.reviews);
+
+// 리뷰 색상 바인딩
+['c1','c2'].forEach(c => {
+  document.getElementById(`${c}-review-text-color`).oninput = function() { state[c].reviewTextColor = this.value; renderCard(); };
+  document.getElementById(`${c}-review-bg-color`).oninput  = function() { state[c].reviewBgColor   = this.value; renderCard(); };
+  document.getElementById(`${c}-review-star-color`).oninput = function() { state[c].reviewStarColor = this.value; renderCard(); };
+});
 
 /* ═══════════════════════════════════════
    CHAT MESSAGES
@@ -1860,13 +1890,13 @@ function renderCard() {
   // Char A image
   const c1wrap = document.getElementById('c1-img-wrap');
   c1wrap.innerHTML = state.c1.img
-    ? `<img src="${state.c1.img}" style="width:100%;height:100%;object-fit:cover;">`
+    ? `<img src="${state.c1.img}" style="width:100%;height:100%;object-fit:contain;object-position:top center;">`
     : `<div class="char-img-placeholder">👤</div>`;
 
   // Char A tags
   renderOutputTags('out-c1-tags', state.c1.tags, state.c1.tagStyle, state.c1.tagBgColor, state.c1.tagTextColor);
   // Char A reviews
-  renderOutputReviews('out-c1-reviews', state.c1.reviews, solid);
+  renderOutputReviews('out-c1-reviews', state.c1.reviews, state.c1.reviewTextColor, state.c1.reviewBgColor, state.c1.reviewStarColor);
 
   // Char B
   const c2nameEl = document.getElementById('out-c2-name');
@@ -1882,11 +1912,11 @@ function renderCard() {
 
   const c2wrap = document.getElementById('c2-img-wrap');
   c2wrap.innerHTML = state.c2.img
-    ? `<img src="${state.c2.img}" style="width:100%;height:100%;object-fit:cover;">`
+    ? `<img src="${state.c2.img}" style="width:100%;height:100%;object-fit:contain;object-position:top center;">`
     : `<div class="char-img-placeholder">👤</div>`;
 
   renderOutputTags('out-c2-tags', state.c2.tags, state.c2.tagStyle, state.c2.tagBgColor, state.c2.tagTextColor);
-  renderOutputReviews('out-c2-reviews', state.c2.reviews, solid);
+  renderOutputReviews('out-c2-reviews', state.c2.reviews, state.c2.reviewTextColor, state.c2.reviewBgColor, state.c2.reviewStarColor);
 
   // Relation meters
   const relTagsEl = document.getElementById('out-rel-tags');
@@ -1986,23 +2016,24 @@ function renderOutputTags(containerId, tags, style, bgColor, textColor) {
   });
 }
 
-function renderOutputReviews(containerId, reviews, acc) {
+function renderOutputReviews(containerId, reviews, textColor, bgColor, starColor) {
   const el = document.getElementById(containerId);
   el.innerHTML = '';
   reviews.forEach(rev => {
     const div = document.createElement('div');
     div.className = 'review-card';
+    div.style.background = bgColor || 'rgba(0,0,0,0.025)';
     let starsHtml = '';
     for (let n = 1; n <= 5; n++) {
-      starsHtml += `<span class="review-star ${n <= rev.score ? '' : 'empty'}">★</span>`;
+      starsHtml += `<span class="review-star ${n <= rev.score ? '' : 'empty'}" style="color:${n <= rev.score ? (starColor||'#f5a623') : '#ddd'};">★</span>`;
     }
     div.innerHTML = `
       <div class="review-card-head">
         <div class="review-stars">${starsHtml}</div>
-        <div class="review-score">${rev.score}.0</div>
-        <div class="review-author">${rev.author}</div>
+        <div class="review-score" style="color:${textColor||'#333'};">${rev.score}.0</div>
+        <div class="review-author" style="color:${textColor||'#333'};">${rev.author}</div>
       </div>
-      <div class="review-text">${rev.text}</div>
+      <div class="review-text" style="color:${textColor||'#333'};">${rev.text}</div>
     `;
     el.appendChild(div);
   });
