@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CharaCard — 캐릭터 관계 카드 메이커</title>
+<title>화송이네 도토리 — 캐릭터 관계 카드 메이커</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Noto+Serif+KR:wght@400;700&family=Black+Han+Sans&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
@@ -732,10 +732,24 @@ body {
   position: absolute;
   top: 50%;
   transform: translate(-50%, -50%);
+  width: 22px; height: 22px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  line-height: 1;
+  background: transparent;
+  -webkit-text-stroke: 2.5px white;
+  paint-order: stroke fill;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.35));
+}
+.meter-dot.shape-circle {
   width: 11px; height: 11px;
   border-radius: 50%;
   border: 2px solid #fff;
   box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  font-size: 0;
+  background: inherit;
+  -webkit-text-stroke: 0;
+  filter: none;
 }
 
 /* Divider line with icon */
@@ -857,7 +871,7 @@ select option { background: #fff; color: #1a1a1a; }
 
 <!-- App Header -->
 <header class="app-header">
-  <div class="app-logo">Chara<span>Card</span></div>
+  <div class="app-logo">화송이네 <span>도토리</span></div>
   <span style="font-size:12px;color:var(--text3);">캐릭터 관계 카드 메이커</span>
   <div class="header-gap"></div>
   <button class="header-btn-sec" id="btn-reset">초기화</button>
@@ -1048,7 +1062,7 @@ select option { background: #fff; color: #1a1a1a; }
       </div>
 
       <div class="section-title">● 관계 수치 슬라이더</div>
-      <div style="background:var(--bg-panel2);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
+      <div style="background:var(--bg-panel2);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
         <div style="display:flex;align-items:center;gap:6px;">
           <span style="font-size:11px;color:var(--text3);">채워진 색</span>
           <input type="color" id="meter-fill-color" value="#c0392b" style="width:26px;height:26px;border:none;border-radius:5px;cursor:pointer;">
@@ -1060,6 +1074,13 @@ select option { background: #fff; color: #1a1a1a; }
         <div style="display:flex;align-items:center;gap:6px;">
           <span style="font-size:11px;color:var(--text3);">레이블 색</span>
           <input type="color" id="meter-label-color" value="#333333" style="width:26px;height:26px;border:none;border-radius:5px;cursor:pointer;">
+        </div>
+        <div style="display:flex;align-items:center;gap:5px;width:100%;">
+          <span style="font-size:11px;color:var(--text3);">포인트 모양</span>
+          <div style="display:flex;gap:5px;">
+            <button class="meter-shape-btn active" data-shape="circle" style="width:30px;height:30px;border-radius:6px;border:1.5px solid var(--border2);background:var(--bg-panel);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;">●</button>
+            <button class="meter-shape-btn" data-shape="heart" style="width:30px;height:30px;border-radius:6px;border:1.5px solid var(--border2);background:var(--bg-panel);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;">♥</button>
+          </div>
         </div>
       </div>
       <div id="meter-editor" style="display:flex;flex-direction:column;gap:10px;margin-bottom:8px;"></div>
@@ -1227,9 +1248,6 @@ select option { background: #fff; color: #1a1a1a; }
           <div class="narrative-section">
             <div class="timeline" id="out-timeline"></div>
           </div>
-          <div class="card-plus-deco">
-            <div class="plus-circle">+</div>
-          </div>
         </div>
 
         <!-- ── Right: Char B ── -->
@@ -1272,7 +1290,7 @@ select option { background: #fff; color: #1a1a1a; }
 const state = {
   c1: { name:'캐릭터이름1', nameColor:'#1a1a1a', catchphrase:'', catchphraseColor:'#555555', age:'성별 | 나이', affil:'소속 / 직업', infoColor:'#888799', desc:'캐릭터이름1에 대한 소개를 입력하세요.', descBarColor:'#c0392b', descTextColor:'#555555', tagStyle:'filled', tagBgColor:'#c0392b', tagTextColor:'#ffffff', img:null, tags:[], reviews:[] },
   c2: { name:'캐릭터이름2', nameColor:'#1a1a1a', catchphrase:'', catchphraseColor:'#555555', age:'성별 | 나이', affil:'소속 / 직업', infoColor:'#888799', desc:'캐릭터이름2에 대한 소개를 입력하세요.', descBarColor:'#c0392b', descTextColor:'#555555', tagStyle:'filled', tagBgColor:'#c0392b', tagTextColor:'#ffffff', img:null, tags:[], reviews:[] },
-  rel: { type:'페어명', world:'캐릭터이름1 with 캐릭터이름2', meters:[ {left:'적대감', right:'친밀감', value:30}, {left:'불신', right:'신뢰', value:50}, {left:'거리감', right:'의존', value:20} ], meterFillColor:'#c0392b', meterEmptyColor:'#dddddd', meterLabelColor:'#333333', chat:[ {side:'left', text:'캐릭터이름1의 대사'}, {side:'right', text:'캐릭터이름2의 대사'} ], timeline:[ {label:'만남', text:'두 사람의 첫 만남을 입력하세요.'}, {label:'갈등', text:'갈등과 긴장감을 입력하세요.'}, {label:'전환점', text:'관계의 전환점을 입력하세요.'} ], tlLabelColor:'#c0392b', tlBarColor:'#c0392b', tlTextColor:'#555555' },
+  rel: { type:'페어명', world:'캐릭터이름1 with 캐릭터이름2', meters:[ {left:'적대감', right:'친밀감', value:30}, {left:'불신', right:'신뢰', value:50}, {left:'거리감', right:'의존', value:20} ], meterFillColor:'#c0392b', meterEmptyColor:'#dddddd', meterLabelColor:'#333333', meterDotShape:'circle', chat:[ {side:'left', text:'캐릭터이름1의 대사'}, {side:'right', text:'캐릭터이름2의 대사'} ], timeline:[ {label:'만남', text:'두 사람의 첫 만남을 입력하세요.'}, {label:'갈등', text:'갈등과 긴장감을 입력하세요.'}, {label:'전환점', text:'관계의 전환점을 입력하세요.'} ], tlLabelColor:'#c0392b', tlBarColor:'#c0392b', tlTextColor:'#555555' },
   design: { accent:'#c0392b', useGradient:false, gradC1:'#c0392b', gradC2:'#c0392b', gradDir:135, cardBg:'#ffffff', tagStyle:'filled', cardWidth:900, headerTextColor:'#ffffff', bubbleC1:'#ebebeb', bubbleC1Text:'#1a1a1a', bubbleC2:'#c0392b', bubbleC2Text:'#ffffff' }
 };
 
@@ -1648,6 +1666,22 @@ document.getElementById('meter-fill-color').oninput  = function() { state.rel.me
 document.getElementById('meter-empty-color').oninput = function() { state.rel.meterEmptyColor = this.value; renderCard(); };
 document.getElementById('meter-label-color').oninput = function() { state.rel.meterLabelColor = this.value; renderCard(); };
 
+// 미터 모양 버튼
+document.querySelectorAll('.meter-shape-btn').forEach(btn => {
+  btn.onclick = function() {
+    document.querySelectorAll('.meter-shape-btn').forEach(b => {
+      b.style.background = 'var(--bg-panel)';
+      b.style.borderColor = 'var(--border2)';
+      b.style.color = '';
+    });
+    this.style.background = 'var(--accent)';
+    this.style.borderColor = 'var(--accent)';
+    this.style.color = '#fff';
+    state.rel.meterDotShape = this.dataset.shape;
+    renderCard();
+  };
+});
+
 /* ═══════════════════════════════════════
    DESIGN CONTROLS
 ═══════════════════════════════════════ */
@@ -1860,6 +1894,13 @@ function renderCard() {
   const mFill  = state.rel.meterFillColor  || solid;
   const mEmpty = state.rel.meterEmptyColor || '#dddddd';
   const mLabel = state.rel.meterLabelColor || '#333333';
+  const mShape = state.rel.meterDotShape   || 'circle';
+
+  const dotSymbol = mShape === 'heart' ? '♥' : '';
+  const dotClass  = mShape === 'circle' ? 'meter-dot shape-circle' : 'meter-dot';
+  const dotBg     = mShape === 'circle' ? `background:${mFill};` : '';
+  const dotColor  = mShape !== 'circle' ? `color:${mFill};` : '';
+
   state.rel.meters.forEach(m => {
     const row = document.createElement('div');
     row.className = 'meter-row';
@@ -1871,7 +1912,7 @@ function renderCard() {
       </div>
       <div class="meter-track" style="background:${mEmpty};">
         <div class="meter-fill" style="width:${pct}%;background:${mFill};"></div>
-        <div class="meter-dot" style="left:${pct}%;background:${mFill};"></div>
+        <div class="${dotClass}" style="left:${pct}%;${dotBg}${dotColor}">${dotSymbol}</div>
       </div>
     `;
     relTagsEl.appendChild(row);
